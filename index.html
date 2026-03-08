@@ -10,7 +10,65 @@
 <body>
   <header id="app-header">
     <h1>EV Charger Coverage Map — Alberta</h1>
+    <button id="info-btn" aria-label="About this app">About</button>
   </header>
+
+  <div id="info-modal" class="modal hidden">
+    <div class="modal-content">
+      <button id="info-close" class="modal-close" aria-label="Close">&times;</button>
+      <h2>About This App</h2>
+
+      <h3>Charger Station Data</h3>
+      <p>
+        Charging station locations are sourced from the
+        <a href="https://developer.nrel.gov/docs/transportation/alt-fuel-stations-v1/" target="_blank" rel="noopener">
+        U.S. Department of Energy — Alternative Fuel Stations API</a>,
+        maintained by the <strong>National Renewable Energy Laboratory (NREL)</strong>
+        as part of the <a href="https://afdc.energy.gov/" target="_blank" rel="noopener">Alternative Fuels Data Center (AFDC)</a>.
+      </p>
+      <p>
+        The dataset includes public EV charging stations in Alberta, Canada, filtered
+        to DC Fast Charging (DCFC) and Level 2 stations. Data was last exported on
+        <strong>March 8, 2026</strong>.
+      </p>
+
+      <h3>Map Tiles</h3>
+      <p>
+        Map tiles provided by <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.
+      </p>
+
+      <h3>Range Calculations</h3>
+      <ul>
+        <li><strong>Temperature degradation:</strong> Linear model from 100% at 20&deg;C to 50% at &minus;20&deg;C and below. Based on real-world cold weather data from AAA and Recurrent Auto studies.</li>
+        <li><strong>Highway speed loss:</strong> Based on aerodynamic drag increasing with speed squared. At 120 km/h, approximately 28% range loss compared to the 90 km/h baseline.</li>
+        <li><strong>Battery reserve:</strong> Subtracts a safety buffer so you don't arrive at 0%.</li>
+        <li><strong>Starting charge:</strong> Accounts for the common recommendation not to charge above 80%.</li>
+        <li><strong>Round-trip safe:</strong> Halves the effective range, ensuring you can reach a charger and return.</li>
+      </ul>
+
+      <h3>Risk Coloring</h3>
+      <ul>
+        <li><strong>Green (3+ chargers):</strong> Low risk — multiple DC fast chargers available.</li>
+        <li><strong>Yellow (2 chargers):</strong> Moderate risk — if one is in use or broken, you may wait.</li>
+        <li><strong>Red (1 charger):</strong> High risk — single point of failure.</li>
+        <li><strong>Blue (Level 2):</strong> Slow charging only (~7 kW), not practical for road trips.</li>
+      </ul>
+      <p>Charger count is based on DC fast charging ports only, excluding CHAdeMO connectors (deprecated standard).</p>
+
+      <h3>Coverage Calculation</h3>
+      <p>
+        Coverage percentage is calculated by sampling ~17,000 grid points across Alberta's land area
+        and checking how many fall within the adjusted range of at least one active charging station,
+        using the Haversine distance formula.
+      </p>
+
+      <h3>Open Source</h3>
+      <p>
+        Source code available on <a href="https://github.com/mattolan/EVRangeCoverage" target="_blank" rel="noopener">GitHub</a>.
+        Built with Leaflet.js and vanilla JavaScript. No backend, no frameworks.
+      </p>
+    </div>
+  </div>
 
   <div id="app-container">
     <aside id="sidebar">

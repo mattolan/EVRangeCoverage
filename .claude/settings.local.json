@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell:*)",
+      "Bash(for f in beuyr2wx3 brrkcei33 barkyirtt bbo31315i b4ksjsfzh b1w92v5yl)",
+      "Bash(do echo \"=== $f ===\")",
+      "Read(//c/Users/Desktop/AppData/Local/Temp/claude/C--code-EVRangeCoverage/tasks/**)",
+      "Bash(done)",
+      "Bash(powershell.exe:*)",
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "WebSearch"
+    ]
+  }
+}

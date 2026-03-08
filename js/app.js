@@ -540,6 +540,17 @@
     document.getElementById('sidebar-toggle').addEventListener('click', function () {
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
+
+    // Info modal
+    document.getElementById('info-btn').addEventListener('click', function () {
+      document.getElementById('info-modal').classList.remove('hidden');
+    });
+    document.getElementById('info-close').addEventListener('click', function () {
+      document.getElementById('info-modal').classList.add('hidden');
+    });
+    document.getElementById('info-modal').addEventListener('click', function (e) {
+      if (e.target === this) this.classList.add('hidden');
+    });
   }
 
   // ============================================================

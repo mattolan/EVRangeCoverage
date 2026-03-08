@@ -41,6 +41,88 @@ html, body {
   white-space: nowrap;
 }
 
+#info-btn {
+  margin-left: auto;
+  background: rgba(255,255,255,0.15);
+  color: var(--color-text);
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+#info-btn:hover { background: rgba(255,255,255,0.25); }
+
+/* === Modal === */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.hidden { display: none; }
+
+.modal-content {
+  background: var(--color-sidebar);
+  color: var(--color-text);
+  border-radius: 10px;
+  padding: 1.5rem 2rem;
+  max-width: 640px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+
+.modal-content h2 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.modal-content h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.95rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.modal-content p,
+.modal-content li {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #ccc;
+}
+
+.modal-content ul {
+  padding-left: 1.2rem;
+  margin: 0.3rem 0;
+}
+
+.modal-content a {
+  color: #4a9eff;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: block;
+}
+
+.modal-close:hover { color: #fff; }
+
 /* === Layout === */
 #app-container {
   display: flex;
