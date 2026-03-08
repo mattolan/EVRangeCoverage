@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EV Charger Coverage Map — Alberta</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header id="app-header">
+    <h1>EV Charger Coverage Map — Alberta</h1>
+  </header>
+
+  <div id="app-container">
+    <aside id="sidebar">
+      <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+
+      <section class="sidebar-section">
+        <h2>Vehicle Range</h2>
+        <label for="range-input">Manufacturer rated range (km)</label>
+        <input type="number" id="range-input" min="50" max="1000" value="450" step="10" />
+      </section>
+
+      <section class="sidebar-section">
+        <h2>Highway Speed</h2>
+        <div class="slider-container">
+          <input type="range" id="speed-slider" min="90" max="140" value="120" step="5" />
+          <div class="slider-labels">
+            <span>90 km/h</span>
+            <span id="speed-value">120 km/h</span>
+            <span>140 km/h</span>
+          </div>
+        </div>
+        <div id="speed-factor" class="info-badge">Speed loss: —%</div>
+      </section>
+
+      <section class="sidebar-section">
+        <h2>Temperature</h2>
+        <div class="slider-container">
+          <input type="range" id="temp-slider" min="-40" max="35" value="0" step="1" />
+          <div class="slider-labels">
+            <span>-40°C</span>
+            <span id="temp-value">0°C</span>
+            <span>35°C</span>
+          </div>
+        </div>
+        <div id="temp-factor" class="info-badge">Range factor: 80%</div>
+      </section>
+
+
+      <section class="sidebar-section">
+        <h2>Battery</h2>
+        <label for="soc-slider" class="slider-label-inline">Start charge <span id="soc-value">80%</span></label>
+        <input type="range" id="soc-slider" min="50" max="100" value="80" step="5" />
+        <label for="reserve-slider" class="slider-label-inline">Reserve <span id="reserve-value">20%</span></label>
+        <input type="range" id="reserve-slider" min="0" max="40" value="20" step="5" />
+        <div id="reserve-info" class="info-badge">Usable battery: 60%</div>
+      </section>
+
+      <section class="sidebar-section">
+        <h2>Options</h2>
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="range-mode" value="roundtrip" checked />
+            Round-trip safe
+          </label>
+          <label>
+            <input type="radio" name="range-mode" value="oneway" />
+            One-way range
+          </label>
+        </div>
+        <hr class="section-divider" />
+        <label class="checkbox-label">
+          <input type="checkbox" id="safe-route-toggle" />
+          Safe Route (hide single-charger)
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="show-l2-toggle" />
+          Show Level 2 stations
+        </label>
+        <hr class="section-divider" />
+        <label for="opacity-slider" class="slider-label-inline">Overlay opacity <span id="opacity-value">40%</span></label>
+        <input type="range" id="opacity-slider" min="5" max="50" value="40" step="1" />
+      </section>
+
+    </aside>
+
+    <div id="map-wrapper">
+      <div id="map"></div>
+      <div id="coverage-overlay">
+        <div id="coverage-display" class="coverage-value">—%</div>
+        <div id="coverage-label" class="coverage-label">of Alberta covered</div>
+      </div>
+      <div id="legend-overlay">
+        <div class="legend-item" title="3 or more DC fast chargers available — low risk of waiting or being stranded"><span class="legend-dot green"></span> 3+ chargers</div>
+        <div class="legend-item" title="2 DC fast chargers — moderate risk, one may be in use or out of service"><span class="legend-dot yellow"></span> 2 chargers</div>
+        <div class="legend-item" title="Single DC fast charger — high risk, if it's occupied or broken you're stuck"><span class="legend-dot red"></span> 1 charger</div>
+        <div class="legend-item" title="Level 2 charging only — slow charging (~7kW), not practical for road trips"><span class="legend-dot blue"></span> Level 2</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading-spinner" class="spinner hidden">
+    <div class="spinner-ring"></div>
+    <span>Loading…</span>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+[
+  { "make": "Tesla", "model": "Model 3 Long Range", "year": 2024, "rangeKm": 576, "batteryKwh": 82 },
+  { "make": "Tesla", "model": "Model 3 Standard Range", "year": 2024, "rangeKm": 438, "batteryKwh": 60 },
+  { "make": "Tesla", "model": "Model Y Long Range", "year": 2024, "rangeKm": 531, "batteryKwh": 75 },
+  { "make": "Tesla", "model": "Model Y Standard Range", "year": 2024, "rangeKm": 393, "batteryKwh": 60 },
+  { "make": "Hyundai", "model": "Ioniq 5 Long Range AWD", "year": 2024, "rangeKm": 488, "batteryKwh": 77.4 },
+  { "make": "Hyundai", "model": "Ioniq 5 Standard Range", "year": 2024, "rangeKm": 354, "batteryKwh": 58 },
+  { "make": "Hyundai", "model": "Kona Electric", "year": 2024, "rangeKm": 418, "batteryKwh": 64.8 },
+  { "make": "Chevrolet", "model": "Bolt EV", "year": 2023, "rangeKm": 417, "batteryKwh": 65 },
+  { "make": "Chevrolet", "model": "Equinox EV", "year": 2024, "rangeKm": 515, "batteryKwh": 85 },
+  { "make": "Ford", "model": "Mustang Mach-E Extended Range", "year": 2024, "rangeKm": 502, "batteryKwh": 91 },
+  { "make": "Ford", "model": "Mustang Mach-E Standard Range", "year": 2024, "rangeKm": 370, "batteryKwh": 72 },
+  { "make": "Nissan", "model": "Leaf Plus", "year": 2024, "rangeKm": 340, "batteryKwh": 62 },
+  { "make": "Nissan", "model": "Leaf S", "year": 2024, "rangeKm": 240, "batteryKwh": 40 },
+  { "make": "Kia", "model": "EV6 Long Range AWD", "year": 2024, "rangeKm": 499, "batteryKwh": 77.4 },
+  { "make": "Kia", "model": "EV6 Standard Range", "year": 2024, "rangeKm": 373, "batteryKwh": 58 }
+]

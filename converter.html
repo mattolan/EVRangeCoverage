@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Charger Data Converter</title>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 2rem auto; background: #1a1a2e; color: #eee; padding: 1rem; }
+    h1 { font-size: 1.3rem; }
+    #drop-zone { border: 2px dashed #555; border-radius: 8px; padding: 3rem; text-align: center; margin: 1rem 0; cursor: pointer; }
+    #drop-zone.hover { border-color: #e94560; background: rgba(233,69,96,0.1); }
+    #stats { white-space: pre-wrap; background: #16213e; padding: 1rem; border-radius: 8px; margin: 1rem 0; display: none; }
+    button { background: #e94560; color: #fff; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; font-size: 1rem; cursor: pointer; display: none; }
+    button:hover { opacity: 0.85; }
+    input[type="file"] { display: none; }
+  </style>
+</head>
+<body>
+  <h1>NREL AFDC → chargers.json Converter</h1>
+  <p>Select or drag the NREL export file (.csv, .txt, or .json)</p>
+
+  <div id="drop-zone">
+    Click here or drag & drop the file
+    <input type="file" id="file-input" accept=".txt,.json,.csv">
+  </div>
+
+  <div id="stats"></div>
+  <button id="save-btn">Save chargers.json</button>
+
+  <script>
+    var CONNECTOR_MAP = {
+      'CCS': 'CCS',
+      'TESLA': 'Tesla',
+      'J1772': 'J1772',
+      'J1772COMBO': 'CCS',
+      'NEMA_5_15': null,
+      'NEMA_5_20': null,
+      'NEMA_14_50': null,
+      'NEMA_14_30': null,
+      'CHADEMO': null,
+    };
+
+    var STATUS_MAP = { 'E': 'operational', 'T': 'temporary_outage', 'P': 'planned' };
+
+    var convertedJSON = null;
+
+    var dropZone = document.getElementById('drop-zone');
+    var fileInput = document.getElementById('file-input');
+    var statsEl = document.getElementById('stats');
+    var saveBtn = document.getElementById('save-btn');
+
+    dropZone.addEventListener('click', function () { fileInput.click(); });
+    dropZone.addEventListener('dragover', function (e) { e.preventDefault(); dropZone.classList.add('hover'); });
+    dropZone.addEventListener('dragleave', function () { dropZone.classList.remove('hover'); });
+    dropZone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      dropZone.classList.remove('hover');
+      if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', function () {
+      if (fileInput.files.length) processFile(fileInput.files[0]);
+    });
+
+    function processFile(file) {
+      dropZone.textContent = 'Processing ' + file.name + '...';
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          var text = e.target.result.trim();
+          var fuelStations;
+
+          // Detect format: JSON or CSV
+          if (text.charAt(0) === '{' || text.charAt(0) === '[') {
+            // JSON format
+            var raw = JSON.parse(text);
+            fuelStations = raw.fuel_stations || raw;
+            if (!Array.isArray(fuelStations)) {
+              throw new Error('Could not find fuel_stations array in the JSON');
+            }
+            fuelStations = fuelStations.map(normalizeJsonStation);
+          } else {
+            // CSV format
+            fuelStations = parseCSV(text);
+          }
+
+          convertStations(fuelStations);
+        } catch (err) {
+          statsEl.style.display = 'block';
+          statsEl.textContent = 'ERROR: ' + err.message + '\n\n' + err.stack;
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Parse CSV with proper quoting support
+    function parseCSV(text) {
+      var lines = splitCSVLines(text);
+      if (lines.length < 2) throw new Error('CSV has no data rows');
+
+      var headers = parseCSVRow(lines[0]);
+      var rows = [];
+
+      for (var i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        var values = parseCSVRow(lines[i]);
+        var obj = {};
+        for (var h = 0; h < headers.length; h++) {
+          obj[headers[h].trim()] = (values[h] || '').trim();
+        }
+        rows.push(obj);
+      }
+
+      console.log('[Converter] CSV headers:', headers);
+      console.log('[Converter] First row:', rows[0]);
+      return rows;
+    }
+
+    // Split text into lines, respecting quoted fields that contain newlines
+    function splitCSVLines(text) {
+      var lines = [];
+      var current = '';
+      var inQuotes = false;
+      for (var i = 0; i < text.length; i++) {
+        var ch = text[i];
+        if (ch === '"') {
+          inQuotes = !inQuotes;
+          current += ch;
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          if (ch === '\r' && text[i + 1] === '\n') i++; // skip \r\n
+          lines.push(current);
+          current = '';
+        } else {
+          current += ch;
+        }
+      }
+      if (current) lines.push(current);
+      return lines;
+    }
+
+    // Parse a single CSV row, handling quoted fields
+    function parseCSVRow(line) {
+      var fields = [];
+      var current = '';
+      var inQuotes = false;
+
+      for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (inQuotes) {
+          if (ch === '"') {
+            if (line[i + 1] === '"') {
+              current += '"';
+              i++;
+            } else {
+              inQuotes = false;
+            }
+          } else {
+            current += ch;
+          }
+        } else {
+          if (ch === '"') {
+            inQuotes = true;
+          } else if (ch === ',') {
+            fields.push(current);
+            current = '';
+          } else {
+            current += ch;
+          }
+        }
+      }
+      fields.push(current);
+      return fields;
+    }
+
+    // Normalize a JSON-format station to have consistent field names
+    function normalizeJsonStation(s) {
+      return {
+        'Fuel Type Code': s.fuel_type_code || '',
+        'Station Name': s.station_name || '',
+        'Street Address': s.street_address || '',
+        'City': s.city || '',
+        'State': s.state || '',
+        'Latitude': String(s.latitude || ''),
+        'Longitude': String(s.longitude || ''),
+        'EV Network': s.ev_network || '',
+        'EV DC Fast Count': String(s.ev_dc_fast_num || 0),
+        'EV Level2 EVSE Num': String(s.ev_level2_evse_num || 0),
+        'EV Level1 EVSE Num': String(s.ev_level1_evse_num || 0),
+        'EV Connector Types': Array.isArray(s.ev_connector_types) ? s.ev_connector_types.join(' ') : (s.ev_connector_types || ''),
+        'Status Code': s.status_code || 'E',
+        'Access Code': s.access_code || '',
+      };
+    }
+
+    function convertStations(rows) {
+      // Find the right column names (NREL CSV uses various naming conventions)
+      var first = rows[0];
+      var keys = Object.keys(first);
+
+      function findCol(patterns) {
+        for (var p = 0; p < patterns.length; p++) {
+          var pat = patterns[p].toLowerCase();
+          for (var k = 0; k < keys.length; k++) {
+            if (keys[k].toLowerCase() === pat) return keys[k];
+          }
+        }
+        // Partial match
+        for (var p = 0; p < patterns.length; p++) {
+          var pat = patterns[p].toLowerCase();
+          for (var k = 0; k < keys.length; k++) {
+            if (keys[k].toLowerCase().indexOf(pat) !== -1) return keys[k];
+          }
+        }
+        return null;
+      }
+
+      var COL_FUEL = findCol(['Fuel Type Code', 'fuel_type_code']);
+      var COL_NAME = findCol(['Station Name', 'station_name']);
+      var COL_ADDR = findCol(['Street Address', 'street_address']);
+      var COL_CITY = findCol(['City', 'city']);
+      var COL_STATE = findCol(['State', 'state']);
+      var COL_LAT = findCol(['Latitude', 'latitude']);
+      var COL_LNG = findCol(['Longitude', 'longitude']);
+      var COL_NETWORK = findCol(['EV Network', 'ev_network']);
+      var COL_DCFAST = findCol(['EV DC Fast Count', 'ev_dc_fast_num', 'ev_dc_fast_count']);
+      var COL_L2 = findCol(['EV Level2 EVSE Num', 'ev_level2_evse_num']);
+      var COL_L1 = findCol(['EV Level1 EVSE Num', 'ev_level1_evse_num']);
+      var COL_CONNECTORS = findCol(['EV Connector Types', 'ev_connector_types']);
+      var COL_STATUS = findCol(['Status Code', 'status_code']);
+      var COL_ACCESS = findCol(['Access Code', 'access_code']);
+
+      console.log('[Converter] Column mapping:', {
+        fuel: COL_FUEL, name: COL_NAME, lat: COL_LAT, lng: COL_LNG,
+        dcfast: COL_DCFAST, l2: COL_L2, connectors: COL_CONNECTORS,
+        status: COL_STATUS, access: COL_ACCESS
+      });
+
+      var output = [];
+      var skippedPrivate = 0;
+      var skippedL1 = 0;
+      var skippedNonElec = 0;
+      var skippedNoCoords = 0;
+      var idx = 0;
+
+      for (var i = 0; i < rows.length; i++) {
+        var s = rows[i];
+
+        // Filter: electric only
+        var fuelType = COL_FUEL ? s[COL_FUEL] : 'ELEC';
+        if (fuelType !== 'ELEC') { skippedNonElec++; continue; }
+
+        // Filter: public only
+        var access = COL_ACCESS ? (s[COL_ACCESS] || '').toLowerCase() : 'public';
+        if (access !== 'public') { skippedPrivate++; continue; }
+
+        var lat = parseFloat(s[COL_LAT]);
+        var lng = parseFloat(s[COL_LNG]);
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) { skippedNoCoords++; continue; }
+
+        var dcFast = parseInt(s[COL_DCFAST]) || 0;
+        var level2 = COL_L2 ? (parseInt(s[COL_L2]) || 0) : 0;
+        var level1 = COL_L1 ? (parseInt(s[COL_L1]) || 0) : 0;
+
+        if (dcFast === 0 && level2 === 0) { skippedL1++; continue; }
+
+        var chargerLevel = dcFast > 0 ? 'DCFC' : 'L2';
+        var connectorCount = chargerLevel === 'DCFC' ? dcFast : level2;
+
+        // Parse connector types (space-separated in CSV)
+        var rawTypesStr = COL_CONNECTORS ? (s[COL_CONNECTORS] || '') : '';
+        var rawTypes = rawTypesStr.split(/[\s,]+/).filter(function (t) { return t; });
+        var connectorTypes = [];
+        for (var t = 0; t < rawTypes.length; t++) {
+          var mapped = CONNECTOR_MAP.hasOwnProperty(rawTypes[t]) ? CONNECTOR_MAP[rawTypes[t]] : rawTypes[t];
+          if (mapped && connectorTypes.indexOf(mapped) === -1) {
+            connectorTypes.push(mapped);
+          }
+        }
+
+        var parts = [
+          COL_ADDR ? s[COL_ADDR] : '',
+          COL_CITY ? s[COL_CITY] : '',
+          COL_STATE ? s[COL_STATE] : ''
+        ];
+        var address = parts.filter(function (p) { return p; }).join(', ');
+
+        var statusCode = COL_STATUS ? (s[COL_STATUS] || 'E') : 'E';
+        var status = STATUS_MAP[statusCode] || 'operational';
+
+        idx++;
+        output.push({
+          id: 'ab-' + String(idx).padStart(4, '0'),
+          name: COL_NAME ? (s[COL_NAME] || 'Unknown') : 'Unknown',
+          lat: lat,
+          lng: lng,
+          address: address,
+          network: COL_NETWORK ? (s[COL_NETWORK] || 'Unknown') : 'Unknown',
+          connectorCount: connectorCount,
+          connectorTypes: connectorTypes,
+          chargerLevel: chargerLevel,
+          dcFastNum: dcFast,
+          level2Num: level2,
+          status: status,
+        });
+      }
+
+      convertedJSON = JSON.stringify(output, null, 2);
+
+      var dcfcCount = output.filter(function (s) { return s.chargerLevel === 'DCFC'; }).length;
+      var l2Count = output.filter(function (s) { return s.chargerLevel === 'L2'; }).length;
+      var opCount = output.filter(function (s) { return s.status === 'operational'; }).length;
+      var tempCount = output.filter(function (s) { return s.status === 'temporary_outage'; }).length;
+      var planCount = output.filter(function (s) { return s.status === 'planned'; }).length;
+
+      statsEl.style.display = 'block';
+      statsEl.textContent =
+        'Total rows in file: ' + rows.length + '\n' +
+        'Exported: ' + output.length + ' stations\n' +
+        '  - ' + dcfcCount + ' DCFC, ' + l2Count + ' L2\n' +
+        '  - ' + opCount + ' operational, ' + tempCount + ' temp outage, ' + planCount + ' planned\n' +
+        'Skipped: ' + skippedPrivate + ' private, ' + skippedL1 + ' L1-only, ' + skippedNonElec + ' non-electric, ' + skippedNoCoords + ' no coordinates\n\n' +
+        'Click "Save chargers.json" then save it to:\n' +
+        'C:\\code\\EVRangeCoverage\\data\\chargers.json';
+
+      dropZone.textContent = 'Done! ' + output.length + ' stations converted.';
+      saveBtn.style.display = 'inline-block';
+    }
+
+    saveBtn.addEventListener('click', function () {
+      var blob = new Blob([convertedJSON], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'chargers.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+  </script>
+</body>
+</html>
