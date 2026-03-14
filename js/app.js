@@ -427,6 +427,7 @@
     var radiusKm = getEffectiveRadius();
     drawCircles(radiusKm);
     updateStationCount();
+    updateRangeDisplay(radiusKm);
 
     // Debounce coverage calc — let the map render first
     document.getElementById('coverage-display').textContent = '...';
@@ -450,6 +451,13 @@
     if (l2 > 0) label += ', ' + l2 + ' L2';
     label += ' stations shown';
     document.getElementById('coverage-label').textContent = label;
+  }
+
+  function updateRangeDisplay(radiusKm) {
+    // Show the one-way effective range regardless of mode
+    var effectiveRange = rangeMode === 'roundtrip' ? radiusKm * 2 : radiusKm;
+    var el = document.getElementById('range-display');
+    el.textContent = Math.round(effectiveRange) + ' km';
   }
 
   function updateBatteryInfo() {
