@@ -344,7 +344,7 @@ input[type="range"] {
 #range-overlay {
   position: absolute;
   top: 10px;
-  left: 10px;
+  left: 50px;
   z-index: 800;
   background: rgba(22, 33, 62, 0.9);
   border-radius: 8px;
