@@ -38,3 +38,6 @@ Then open `http://localhost:8000` in your browser.
 ## Tech Stack
 
 Leaflet.js + OpenStreetMap tiles, vanilla HTML/CSS/JS, no framework, no bundler.
+
+EV Charger Coverage Map — Alberta. Built with Leaflet.js, OSRM (demo server) for road-following routes, and vanilla
+  JS. No backend.
