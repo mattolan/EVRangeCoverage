@@ -616,7 +616,8 @@ input[type="range"] {
 }
 
 /* === Route Icons === */
-.route-icon {
+.route-icon,
+.leaflet-div-icon.route-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -630,15 +631,18 @@ input[type="range"] {
   line-height: 1;
 }
 
-.route-icon-start {
+.route-icon-start,
+.leaflet-div-icon.route-icon-start {
   background: var(--color-green);
 }
 
-.route-icon-end {
+.route-icon-end,
+.leaflet-div-icon.route-icon-end {
   background: var(--color-btn);
 }
 
-.route-icon-stop {
+.route-icon-stop,
+.leaflet-div-icon.route-icon-stop {
   background: var(--color-accent);
   font-size: 0.7rem;
 }
