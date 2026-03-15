@@ -722,6 +722,7 @@
     cachedCorridorKey = null;
     cachedCorridorGeometry = null;
     cachedCorridorStations = null;
+    cachedCorridorFailed = false;
     document.getElementById('route-result').classList.add('hidden');
     document.getElementById('route-result').innerHTML = '';
     document.getElementById('route-clear').classList.add('hidden');
@@ -818,6 +819,7 @@
   var cachedCorridorKey = null;   // "lat,lng|lat,lng"
   var cachedCorridorGeometry = null;
   var cachedCorridorStations = null;
+  var cachedCorridorFailed = false; // true if corridor had no charger coverage
 
   function showRouteSpinner(show) {
     var el = document.getElementById('route-calc-indicator');
@@ -850,8 +852,13 @@
     var corridorKey = routeStart.lat + ',' + routeStart.lng + '|' + routeEnd.lat + ',' + routeEnd.lng;
     var corridorStations = stations;
     var corridorGeometry = null;
+    var useHaversineFallback = false;
 
-    if (corridorKey === cachedCorridorKey && cachedCorridorStations) {
+    if (corridorKey === cachedCorridorKey && cachedCorridorFailed) {
+      // This corridor previously had no charger coverage — skip straight to haversine
+      console.log('[Route] Corridor known to fail for these endpoints, using haversine');
+      useHaversineFallback = true;
+    } else if (corridorKey === cachedCorridorKey && cachedCorridorStations) {
       // Reuse cached corridor but re-filter with current station visibility
       corridorGeometry = cachedCorridorGeometry;
       if (corridorGeometry) {
@@ -878,18 +885,28 @@
       cachedCorridorKey = corridorKey;
       cachedCorridorGeometry = corridorGeometry;
       cachedCorridorStations = corridorStations;
+      cachedCorridorFailed = false;
     }
 
     // Step 2: Find the chain of chargers along the corridor
-    var chain = findChargerChain(routeStart, routeEnd, corridorStations, maxFirstLegKm, maxLegKm, corridorGeometry);
-
-    // Step 2b: If corridor route fails, retry with ALL stations using haversine fallback
-    // The OSRM route may follow a road with no chargers (e.g. Hwy 16 via Jasper),
-    // while a longer alternate route (Hwy 43/2 via Edmonton) has charger coverage.
-    // Haversine-based routing isn't tied to the OSRM corridor so it can find these alternates.
-    if (!chain.feasible && corridorStations.length < stations.length) {
-      console.log('[Route] Corridor route failed, retrying with all ' + stations.length + ' stations (haversine fallback)');
+    var chain;
+    if (useHaversineFallback) {
       chain = findChargerChainHaversine(routeStart, routeEnd, stations, maxFirstLegKm, maxLegKm);
+    } else {
+      chain = findChargerChain(routeStart, routeEnd, corridorStations, maxFirstLegKm, maxLegKm, corridorGeometry);
+
+      // Step 2b: If corridor route fails, retry with ALL stations using haversine fallback
+      // The OSRM route may follow a road with no chargers (e.g. Hwy 16 via Jasper),
+      // while a longer alternate route (Hwy 43/2 via Edmonton) has charger coverage.
+      if (!chain.feasible && corridorStations.length < stations.length) {
+        console.log('[Route] Corridor route failed, retrying with all ' + stations.length + ' stations (haversine fallback)');
+        chain = findChargerChainHaversine(routeStart, routeEnd, stations, maxFirstLegKm, maxLegKm);
+        if (chain.feasible) {
+          // Mark this corridor as failed so we skip it on parameter changes
+          cachedCorridorFailed = true;
+          console.log('[Route] Corridor marked as failed — will use haversine for this route');
+        }
+      }
     }
 
     // Step 3: Build waypoints and fetch OSRM routes
