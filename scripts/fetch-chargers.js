@@ -154,6 +154,28 @@ https.get(url, function (res) {
       });
     }
 
+    // Deduplicate: same network within 200m, OR any network within 50m (exact same spot).
+    // Keeps the station with the most connectors / highest power.
+    converted.sort(function (a, b) { return b.connectorCount - a.connectorCount || (b.maxPowerKw || 0) - (a.maxPowerKw || 0); });
+    var deduped = [];
+    for (var d = 0; d < converted.length; d++) {
+      var isDup = false;
+      for (var e = 0; e < deduped.length; e++) {
+        var dLat = Math.abs(converted[d].lat - deduped[e].lat);
+        var dLng = Math.abs(converted[d].lng - deduped[e].lng);
+        var sameNetwork = converted[d].network === deduped[e].network;
+        // Same network within 200m = duplicate
+        // Any network within 50m = duplicate (same physical site, misattributed network)
+        if ((sameNetwork && dLat < 0.002 && dLng < 0.002) || (dLat < 0.0005 && dLng < 0.0005)) {
+          isDup = true;
+          break;
+        }
+      }
+      if (!isDup) deduped.push(converted[d]);
+    }
+    var dupCount = converted.length - deduped.length;
+    converted = deduped;
+
     // Sort by name for consistency
     converted.sort(function (a, b) {
       return a.name.localeCompare(b.name);
@@ -164,6 +186,7 @@ https.get(url, function (res) {
 
     console.log('\nDone!');
     console.log('  Stations saved: ' + converted.length);
+    console.log('  Duplicates removed: ' + dupCount);
     console.log('  Skipped (no coords/connectors): ' + skipped);
     console.log('  With DCFC: ' + converted.filter(function (s) { return s.dcFastNum > 0; }).length);
     console.log('  With power ratings: ' + converted.filter(function (s) { return s.maxPowerKw; }).length);

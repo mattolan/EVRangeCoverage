@@ -230,9 +230,11 @@ async function main() {
   var existing = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
   console.log('Existing NREL stations: ' + existing.length);
 
-  // Build spatial index of existing stations for duplicate detection
-  // Two stations are considered duplicates if they're within 100m of each other
-  var DUPLICATE_THRESHOLD_KM = 0.1;
+  // Duplicate detection: OCM station is a duplicate if an NREL station exists
+  // within 200m on the same network, OR within 50m on any network (same physical site).
+  // OCM network names are often wrong, so 50m is a strong location match regardless of network.
+  var SAME_NETWORK_THRESHOLD_KM = 0.2;
+  var ANY_NETWORK_THRESHOLD_KM = 0.15; // 150m — OCM often has wrong network names for same physical station
 
   var added = 0;
   var updatedPower = 0;
@@ -242,10 +244,10 @@ async function main() {
     var ocm = ocmConverted[o];
     var isDuplicate = false;
 
-    // Check against all existing stations (brute force is fine for ~1000 stations)
     for (var e = 0; e < existing.length; e++) {
       var dist = haversineKm(ocm.lat, ocm.lng, existing[e].lat, existing[e].lng);
-      if (dist < DUPLICATE_THRESHOLD_KM) {
+      var sameNetwork = ocm.network === existing[e].network;
+      if ((sameNetwork && dist < SAME_NETWORK_THRESHOLD_KM) || dist < ANY_NETWORK_THRESHOLD_KM) {
         isDuplicate = true;
 
         // Fill in missing power rating from OCM
