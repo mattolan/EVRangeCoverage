@@ -213,11 +213,20 @@
   });
 
   var coverageTileLayer = null;
+  var selectedCircle = null;
+
+  function clearSelectedCircle() {
+    if (selectedCircle) {
+      map.removeLayer(selectedCircle);
+      selectedCircle = null;
+    }
+  }
 
   function drawCircles(radiusKm) {
     // Remove old layers
     if (coverageTileLayer) { map.removeLayer(coverageTileLayer); coverageTileLayer = null; }
     if (markerLayer) map.removeLayer(markerLayer);
+    clearSelectedCircle();
 
     markerLayer = L.layerGroup();
     var visible = getVisibleStations();
@@ -260,6 +269,23 @@
       });
 
       marker.bindPopup(buildPopup(station, risk));
+
+      // Click to show this station's range circle
+      (function (s, r, c) {
+        marker.on('click', function () {
+          clearSelectedCircle();
+          selectedCircle = L.circle([s.lat, s.lng], {
+            radius: radiusKm * 1000,
+            color: c.fillColor,
+            fillColor: c.fillColor,
+            fillOpacity: 0.08,
+            weight: 2,
+            opacity: 0.8,
+            dashArray: '8, 6',
+          }).addTo(map);
+        });
+      })(station, risk, colors);
+
       markerLayer.addLayer(marker);
     });
 
@@ -408,6 +434,8 @@
   var currentSpeed = 120;
   var startingSoc = 0.80;
   var batteryReserve = 0.20;
+  var chargeToSoc = 0.80;  // SOC to charge to at public stations
+  var preferMajorStations = true;
   var rangeMode = 'roundtrip';
   var safeRoute = false;
   var showL2 = false;
@@ -428,6 +456,9 @@
     drawCircles(radiusKm);
     updateStationCount();
     updateRangeDisplay(radiusKm);
+    updateSettingSummaries();
+
+    pushURL();
 
     // Debounce coverage calc — let the map render first
     document.getElementById('coverage-display').textContent = '...';
@@ -441,6 +472,12 @@
         else el.style.color = 'var(--color-red)';
       });
     }, 100);
+
+    // Recalculate route if one is active
+    if (routeStart && routeEnd && !routeMode) {
+      showRouteSpinner(true);
+      calculateRoute();
+    }
   }
 
   function updateStationCount() {
@@ -454,10 +491,26 @@
   }
 
   function updateRangeDisplay(radiusKm) {
-    // Show the one-way effective range regardless of mode
     var effectiveRange = rangeMode === 'roundtrip' ? radiusKm * 2 : radiusKm;
-    var el = document.getElementById('range-display');
-    el.textContent = Math.round(effectiveRange) + ' km';
+    document.getElementById('range-display').textContent = Math.round(effectiveRange) + ' km';
+
+    // Build breakdown
+    var tempFactor = getRangeFactor(currentTemp);
+    var speedFactor = getSpeedFactor(currentSpeed);
+    var batteryUsable = startingSoc - batteryReserve;
+    var afterTemp = baseRangeKm * tempFactor;
+    var afterSpeed = afterTemp * speedFactor;
+    var afterBattery = afterSpeed * batteryUsable;
+    var modeLabel = rangeMode === 'roundtrip' ? '÷ 2 round-trip' : 'one-way';
+
+    var html =
+      '<div class="breakdown-line"><span>Rated range</span><span>' + baseRangeKm + ' km</span></div>' +
+      '<div class="breakdown-line"><span>Temperature (' + currentTemp + '°C)</span><span>× ' + (tempFactor * 100).toFixed(0) + '% = ' + Math.round(afterTemp) + ' km</span></div>' +
+      '<div class="breakdown-line"><span>Speed (' + currentSpeed + ' km/h)</span><span>× ' + (speedFactor * 100).toFixed(0) + '% = ' + Math.round(afterSpeed) + ' km</span></div>' +
+      '<div class="breakdown-line"><span>Battery (' + Math.round(startingSoc * 100) + '% → ' + Math.round(batteryReserve * 100) + '%)</span><span>× ' + (batteryUsable * 100).toFixed(0) + '% = ' + Math.round(afterBattery) + ' km</span></div>' +
+      '<div class="breakdown-line breakdown-result"><span>' + modeLabel + '</span><span>' + Math.round(effectiveRange) + ' km</span></div>';
+
+    document.getElementById('range-breakdown').innerHTML = html;
   }
 
   function updateBatteryInfo() {
@@ -544,10 +597,68 @@
       refresh();
     });
 
+    // Charge-to slider (route planner)
+    document.getElementById('charge-to-slider').addEventListener('input', function (e) {
+      chargeToSoc = parseInt(e.target.value) / 100;
+      document.getElementById('charge-to-value').textContent = e.target.value + '%';
+      if (routeStart && routeEnd && !routeMode) {
+        showRouteSpinner(true);
+        calculateRoute();
+      }
+    });
+
+    // Prefer major stations toggle
+    document.getElementById('prefer-major-toggle').addEventListener('change', function (e) {
+      preferMajorStations = e.target.checked;
+      if (routeStart && routeEnd && !routeMode) {
+        showRouteSpinner(true);
+        calculateRoute();
+      }
+    });
+
 // Mobile sidebar toggle
     document.getElementById('sidebar-toggle').addEventListener('click', function () {
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
+
+    // Collapsible section headers
+    document.querySelectorAll('.section-header').forEach(function (header) {
+      header.addEventListener('click', function () {
+        var section = document.getElementById(header.getAttribute('data-section'));
+        if (section) section.classList.toggle('collapsed');
+      });
+    });
+
+    // Click map background — route mode or clear selected station
+    map.on('click', function (e) {
+      if (routeMode) {
+        handleRouteClick(e);
+      } else {
+        clearSelectedCircle();
+      }
+    });
+
+    // Route planner buttons
+    document.getElementById('route-toggle').addEventListener('click', function () {
+      if (routeMode) {
+        exitRouteMode();
+        expandSettingsPanels();
+      } else {
+        enterRouteMode();
+      }
+    });
+
+    document.getElementById('route-clear').addEventListener('click', function () {
+      clearRoute();
+      exitRouteMode();
+      var sidebar = document.getElementById('sidebar');
+      var scrollPos = sidebar.scrollTop;
+      expandSettingsPanels();
+      sidebar.scrollTop = scrollPos;
+    });
+
+    // Reset button
+    document.getElementById('reset-btn').addEventListener('click', resetDefaults);
 
     // Info modal
     document.getElementById('info-btn').addEventListener('click', function () {
@@ -559,6 +670,987 @@
     document.getElementById('info-modal').addEventListener('click', function (e) {
       if (e.target === this) this.classList.add('hidden');
     });
+  }
+
+  // ============================================================
+  // COLLAPSIBLE SETTINGS PANELS
+  // ============================================================
+  function collapseSettingsPanels() {
+    document.querySelectorAll('#settings-panels .collapsible').forEach(function (s) {
+      s.classList.add('collapsed');
+    });
+    updateSettingSummaries();
+  }
+
+  function expandSettingsPanels() {
+    document.querySelectorAll('#settings-panels .collapsible').forEach(function (s) {
+      s.classList.remove('collapsed');
+    });
+  }
+
+  function updateSettingSummaries() {
+    document.getElementById('summary-range').textContent = baseRangeKm + ' km';
+    document.getElementById('summary-speed').textContent = currentSpeed + ' km/h';
+    document.getElementById('summary-temp').textContent = currentTemp + '°C';
+    document.getElementById('summary-battery').textContent =
+      Math.round(startingSoc * 100) + '% → ' + Math.round(batteryReserve * 100) + '% reserve';
+    var opts = [];
+    if (rangeMode === 'roundtrip') opts.push('Round-trip');
+    else opts.push('One-way');
+    if (safeRoute) opts.push('Safe');
+    document.getElementById('summary-options').textContent = opts.join(', ');
+  }
+
+  // ============================================================
+  // ROUTE PLANNER
+  // ============================================================
+  var routeMode = false;
+  var routeStart = null;    // {lat, lng}
+  var routeEnd = null;      // {lat, lng}
+  var routeStartMarker = null;
+  var routeEndMarker = null;
+  var routeLineLayer = null;
+  var routeStopMarkers = null;
+
+  function clearRoute() {
+    if (routeStartMarker) { map.removeLayer(routeStartMarker); routeStartMarker = null; }
+    if (routeEndMarker) { map.removeLayer(routeEndMarker); routeEndMarker = null; }
+    if (routeLineLayer) { map.removeLayer(routeLineLayer); routeLineLayer = null; }
+    if (routeStopMarkers) { map.removeLayer(routeStopMarkers); routeStopMarkers = null; }
+    routeStart = null;
+    routeEnd = null;
+    cachedCorridorKey = null;
+    cachedCorridorGeometry = null;
+    cachedCorridorStations = null;
+    document.getElementById('route-result').classList.add('hidden');
+    document.getElementById('route-result').innerHTML = '';
+    document.getElementById('route-clear').classList.add('hidden');
+    showRouteSpinner(false);
+  }
+
+  function exitRouteMode() {
+    routeMode = false;
+    document.getElementById('route-toggle').textContent = 'Plan a Route';
+    document.getElementById('route-instructions').classList.add('hidden');
+    map.getContainer().style.cursor = '';
+    hideCursorTooltip();
+    map.off('mousemove', onMapMouseMove);
+  }
+
+  // Cursor tooltip for route mode
+  var cursorTooltip = null;
+
+  function createCursorTooltip() {
+    if (cursorTooltip) return;
+    cursorTooltip = document.createElement('div');
+    cursorTooltip.id = 'route-cursor-tooltip';
+    cursorTooltip.className = 'route-cursor-tooltip';
+    document.getElementById('map-wrapper').appendChild(cursorTooltip);
+  }
+
+  function updateCursorTooltip(text) {
+    if (!cursorTooltip) createCursorTooltip();
+    cursorTooltip.textContent = text;
+    cursorTooltip.style.display = 'block';
+  }
+
+  function hideCursorTooltip() {
+    if (cursorTooltip) cursorTooltip.style.display = 'none';
+  }
+
+  function onMapMouseMove(e) {
+    if (!cursorTooltip || cursorTooltip.style.display === 'none') return;
+    var container = map.getContainer().getBoundingClientRect();
+    var x = e.originalEvent.clientX - container.left + 15;
+    var y = e.originalEvent.clientY - container.top - 10;
+    cursorTooltip.style.left = x + 'px';
+    cursorTooltip.style.top = y + 'px';
+  }
+
+  function enterRouteMode() {
+    routeMode = true;
+    clearRoute();
+    collapseSettingsPanels();
+    document.getElementById('route-toggle').textContent = 'Cancel Route';
+    document.getElementById('route-instructions').classList.remove('hidden');
+    document.getElementById('route-instructions').textContent = 'Click the map to set your start point';
+    map.getContainer().style.cursor = 'crosshair';
+    updateCursorTooltip('Click to set starting point');
+    map.on('mousemove', onMapMouseMove);
+  }
+
+  function handleRouteClick(e) {
+    if (!routeMode) return;
+
+    if (!routeStart) {
+      routeStart = { lat: e.latlng.lat, lng: e.latlng.lng };
+      routeStartMarker = L.marker([routeStart.lat, routeStart.lng], {
+        icon: L.divIcon({
+          className: 'route-icon route-icon-start',
+          html: 'A',
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+        })
+      }).addTo(map);
+      document.getElementById('route-instructions').textContent = 'Click the map to set your destination';
+      updateCursorTooltip('Click to set destination');
+    } else if (!routeEnd) {
+      routeEnd = { lat: e.latlng.lat, lng: e.latlng.lng };
+      routeEndMarker = L.marker([routeEnd.lat, routeEnd.lng], {
+        icon: L.divIcon({
+          className: 'route-icon route-icon-end',
+          html: 'B',
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+        })
+      }).addTo(map);
+      document.getElementById('route-instructions').classList.add('hidden');
+      hideCursorTooltip();
+      map.off('mousemove', onMapMouseMove);
+      map.getContainer().style.cursor = '';
+      calculateRoute();
+    }
+  }
+
+  var routeCalcId = 0; // cancel stale route calculations
+
+  // Cache the corridor so parameter changes don't re-fetch the direct route
+  var cachedCorridorKey = null;   // "lat,lng|lat,lng"
+  var cachedCorridorGeometry = null;
+  var cachedCorridorStations = null;
+
+  function showRouteSpinner(show) {
+    var el = document.getElementById('route-calc-indicator');
+    if (show) {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  }
+
+  async function calculateRoute() {
+    var myId = ++routeCalcId;
+    var adjustedRange = getAdjustedRange(baseRangeKm, currentTemp);
+    // First leg uses starting SOC, subsequent legs use charge-to SOC
+    var maxFirstLegKm = adjustedRange * (startingSoc - batteryReserve);
+    var maxLegKm = adjustedRange * (chargeToSoc - batteryReserve);
+
+    var visible = getVisibleStations();
+    var stations = safeRoute
+      ? visible.filter(function (s) { return s.connectorCount >= 2; })
+      : visible;
+
+    // Show calculating indicators
+    var el = document.getElementById('route-result');
+    el.innerHTML = '<div style="color:#999;font-size:0.85rem;">Calculating route...</div>';
+    el.classList.remove('hidden');
+    showRouteSpinner(true);
+
+    // Step 1: Get corridor — use cache if start/end haven't changed
+    var corridorKey = routeStart.lat + ',' + routeStart.lng + '|' + routeEnd.lat + ',' + routeEnd.lng;
+    var corridorStations = stations;
+    var corridorGeometry = null;
+
+    if (corridorKey === cachedCorridorKey && cachedCorridorStations) {
+      // Reuse cached corridor but re-filter with current station visibility
+      corridorGeometry = cachedCorridorGeometry;
+      if (corridorGeometry) {
+        corridorStations = filterStationsNearRoute(stations, corridorGeometry, 50);
+        if (corridorStations.length < 3) {
+          corridorStations = filterStationsNearRoute(stations, corridorGeometry, 100);
+        }
+      }
+    } else {
+      // Fetch driving route to establish corridor
+      var directRoute = await fetchOSRMRoute([routeStart, routeEnd]);
+      if (myId !== routeCalcId) { showRouteSpinner(false); return; }
+
+      if (directRoute && directRoute.geometry) {
+        corridorGeometry = directRoute.geometry;
+        corridorStations = filterStationsNearRoute(stations, corridorGeometry, 50);
+        console.log('[Route] ' + corridorStations.length + '/' + stations.length + ' stations within 50km of route');
+        if (corridorStations.length < 3) {
+          corridorStations = filterStationsNearRoute(stations, corridorGeometry, 100);
+          console.log('[Route] Widened to 100km: ' + corridorStations.length + ' stations');
+        }
+      }
+      // Cache it
+      cachedCorridorKey = corridorKey;
+      cachedCorridorGeometry = corridorGeometry;
+      cachedCorridorStations = corridorStations;
+    }
+
+    // Step 2: Find the chain of chargers along the corridor
+    var chain = findChargerChain(routeStart, routeEnd, corridorStations, maxFirstLegKm, maxLegKm, corridorGeometry);
+
+    // Step 2b: If corridor route fails, retry with ALL stations (alternate roads may work)
+    if (!chain.feasible && corridorStations.length < stations.length) {
+      console.log('[Route] Corridor route failed, retrying with all ' + stations.length + ' stations');
+      chain = findChargerChain(routeStart, routeEnd, stations, maxFirstLegKm, maxLegKm, corridorGeometry);
+    }
+
+    // Step 3: Build waypoints and fetch OSRM routes
+    var chargerWaypoints = [routeStart];
+    for (var i = 0; i < chain.chain.length; i++) {
+      var c = chain.chain[i];
+      if (c.type === 'charger') {
+        chargerWaypoints.push({ lat: c.station.lat, lng: c.station.lng });
+      }
+    }
+
+    await new Promise(function (r) { setTimeout(r, 200); });
+    if (myId !== routeCalcId) { showRouteSpinner(false); return; }
+
+    if (chain.feasible) {
+      // Feasible: one OSRM request for the full route
+      var allWaypoints = chargerWaypoints.concat([routeEnd]);
+      var osrmResult = await fetchOSRMRoute(allWaypoints);
+      if (myId !== routeCalcId) { showRouteSpinner(false); return; }
+
+      showRouteSpinner(false);
+      displayRouteResult(chain, maxLegKm, osrmResult, null);
+    } else {
+      // Infeasible: separate OSRM for the feasible portion and the gap
+      var osrmFeasible = null;
+      var osrmGap = null;
+      var lastReached = chargerWaypoints[chargerWaypoints.length - 1];
+
+      if (chargerWaypoints.length > 1) {
+        // Feasible portion: start → charger stops
+        osrmFeasible = await fetchOSRMRoute(chargerWaypoints);
+        if (myId !== routeCalcId) { showRouteSpinner(false); return; }
+        await new Promise(function (r) { setTimeout(r, 200); });
+        if (myId !== routeCalcId) { showRouteSpinner(false); return; }
+      }
+
+      // Gap portion: last reached point → destination
+      osrmGap = await fetchOSRMRoute([lastReached, routeEnd]);
+      if (myId !== routeCalcId) { showRouteSpinner(false); return; }
+
+      showRouteSpinner(false);
+      displayRouteResult(chain, maxLegKm, osrmFeasible, osrmGap);
+    }
+  }
+
+  // Fetch road-following route from OSRM demo server
+  async function fetchOSRMRoute(waypoints) {
+    try {
+      var coords = waypoints.map(function (w) { return w.lng + ',' + w.lat; }).join(';');
+      var url = 'https://router.project-osrm.org/route/v1/driving/' + coords +
+        '?overview=full&geometries=geojson&steps=false';
+      var resp = await fetch(url);
+      if (!resp.ok) {
+        console.warn('[Route] OSRM HTTP error:', resp.status);
+        return null;
+      }
+      var data = await resp.json();
+      if (data.code !== 'Ok' || !data.routes || !data.routes[0]) {
+        console.warn('[Route] OSRM response error:', data.code, data.message);
+        return null;
+      }
+
+      var route = data.routes[0];
+      return {
+        geometry: route.geometry.coordinates, // [[lng,lat], ...]
+        totalDistM: route.distance,           // meters
+        totalDurS: route.duration,            // seconds
+        legs: route.legs.map(function (leg) {
+          return { distM: leg.distance, durS: leg.duration };
+        }),
+      };
+    } catch (err) {
+      console.warn('[Route] OSRM fetch failed:', err);
+      return null;
+    }
+  }
+
+  // Filter stations to those within corridorKm of the driving route
+  // Uses pre-sampled route points and fast squared-degree check before haversine
+  function filterStationsNearRoute(stations, routeGeometry, corridorKm) {
+    // Sample route geometry down to ~100 points for speed
+    var step = Math.max(1, Math.floor(routeGeometry.length / 100));
+    var sampled = [];
+    for (var i = 0; i < routeGeometry.length; i += step) {
+      sampled.push(routeGeometry[i]); // [lng, lat]
+    }
+    // Always include last point
+    if (sampled[sampled.length - 1] !== routeGeometry[routeGeometry.length - 1]) {
+      sampled.push(routeGeometry[routeGeometry.length - 1]);
+    }
+
+    // Rough degree threshold for quick reject (~1 degree ≈ 111km at equator, less at higher lat)
+    var degThreshold = corridorKm / 80; // conservative for Alberta's latitude (~52°N)
+
+    return stations.filter(function (s) {
+      // Quick bounding box check against sampled points
+      for (var i = 0; i < sampled.length; i++) {
+        var dLat = Math.abs(s.lat - sampled[i][1]);
+        var dLng = Math.abs(s.lng - sampled[i][0]);
+        if (dLat < degThreshold && dLng < degThreshold) {
+          // Confirm with real haversine
+          if (haversineKm(s.lat, s.lng, sampled[i][1], sampled[i][0]) <= corridorKm) {
+            return true;
+          }
+        }
+      }
+      return false;
+    });
+  }
+
+  // ============================================================
+  // STATION QUALITY SCORING
+  // ============================================================
+  var PREFERRED_NETWORKS = {
+    'Tesla': 5,
+    'PETROCAN': 5,
+    'Electrify Canada': 5,
+    'FLO': 4,
+    'SHELL_RECHARGE': 4,
+    'ChargePoint Network': 3,
+    'COUCHE_TARD': 3,
+    'SWTCH': 2,
+    'CHARGELAB': 2,
+    '7CHARGE': 2,
+    'LOOP': 2,
+    'EV Connect': 2,
+    'Hwisel': 1,
+  };
+
+  var DEALERSHIP_KEYWORDS = [
+    'ford', 'chevrolet', 'chevy', 'buick', 'gmc', 'cadillac', 'toyota',
+    'hyundai', 'kia', 'honda', 'nissan', 'bmw', 'mercedes', 'audi',
+    'volkswagen', 'vw', 'mazda', 'subaru', 'dodge', 'chrysler', 'jeep',
+    'lincoln', 'corvette', 'dealership', 'motors', 'sales ltd',
+  ];
+
+  var DEALERSHIP_NETWORKS = ['FORD_CHARGE', 'GM_CHARGE'];
+
+  // Alberta cities/towns with populations > ~10,000 (amenity proxy)
+  var MAJOR_CENTERS = [
+    { name: 'Calgary', lat: 51.05, lng: -114.07, pop: 5 },
+    { name: 'Edmonton', lat: 53.55, lng: -113.49, pop: 5 },
+    { name: 'Red Deer', lat: 52.27, lng: -113.81, pop: 4 },
+    { name: 'Lethbridge', lat: 49.70, lng: -112.83, pop: 4 },
+    { name: 'Medicine Hat', lat: 50.04, lng: -110.68, pop: 3 },
+    { name: 'Grande Prairie', lat: 55.17, lng: -118.80, pop: 3 },
+    { name: 'Airdrie', lat: 51.29, lng: -114.01, pop: 3 },
+    { name: 'Spruce Grove', lat: 53.54, lng: -113.90, pop: 2 },
+    { name: 'Leduc', lat: 53.26, lng: -113.55, pop: 2 },
+    { name: 'Fort McMurray', lat: 56.73, lng: -111.38, pop: 3 },
+    { name: 'Cochrane', lat: 51.19, lng: -114.47, pop: 2 },
+    { name: 'Okotoks', lat: 50.73, lng: -113.97, pop: 2 },
+    { name: 'Camrose', lat: 53.02, lng: -112.83, pop: 2 },
+    { name: 'Lloydminster', lat: 53.28, lng: -110.01, pop: 2 },
+    { name: 'Cold Lake', lat: 54.46, lng: -110.18, pop: 2 },
+    { name: 'Canmore', lat: 51.09, lng: -115.36, pop: 2 },
+    { name: 'Banff', lat: 51.18, lng: -115.57, pop: 2 },
+    { name: 'Jasper', lat: 52.87, lng: -118.08, pop: 2 },
+    { name: 'Hinton', lat: 53.40, lng: -117.58, pop: 2 },
+    { name: 'Whitecourt', lat: 54.14, lng: -115.68, pop: 2 },
+  ];
+
+  function isDealership(station) {
+    if (DEALERSHIP_NETWORKS.indexOf(station.network) !== -1) return true;
+    var nameLower = station.name.toLowerCase();
+    for (var i = 0; i < DEALERSHIP_KEYWORDS.length; i++) {
+      if (nameLower.indexOf(DEALERSHIP_KEYWORDS[i]) !== -1) return true;
+    }
+    return false;
+  }
+
+  function nearMajorCenter(station) {
+    for (var i = 0; i < MAJOR_CENTERS.length; i++) {
+      var c = MAJOR_CENTERS[i];
+      // Quick degree check (~25km)
+      if (Math.abs(station.lat - c.lat) < 0.25 && Math.abs(station.lng - c.lng) < 0.35) {
+        return c.pop; // return population score
+      }
+    }
+    return 0;
+  }
+
+  function getStationQuality(station) {
+    var score = 0;
+
+    // Dealership penalty
+    if (isDealership(station)) {
+      score -= 30;
+    }
+
+    // Network score (0-5)
+    var networkScore = PREFERRED_NETWORKS[station.network] || 0;
+    if (station.network === 'Non-Networked') networkScore = -2;
+    score += networkScore * 5; // 0-25 points
+
+    // Connector count score
+    var count = station.connectorCount || 1;
+    if (count >= 8) score += 25;
+    else if (count >= 4) score += 20;
+    else if (count >= 3) score += 15;
+    else if (count >= 2) score += 8;
+    else score += 0; // single connector = no bonus
+
+    // Charger level (DCFC preferred)
+    if (station.chargerLevel === 'DCFC') score += 10;
+
+    // Near a major center (amenity proxy)
+    score += nearMajorCenter(station) * 3; // 0-15 points
+
+    return score;
+  }
+
+  // ============================================================
+  // ROUTE PROGRESS HELPER
+  // ============================================================
+  // Build a lookup structure from route geometry: sampled points with cumulative distance
+  function buildRouteProgress(routeGeometry) {
+    if (!routeGeometry || routeGeometry.length < 2) return null;
+    var step = Math.max(1, Math.floor(routeGeometry.length / 200));
+    var points = [];
+    var cumDist = 0;
+    var prev = routeGeometry[0];
+    points.push({ lat: prev[1], lng: prev[0], cumDist: 0 });
+    for (var i = step; i < routeGeometry.length; i += step) {
+      var pt = routeGeometry[i];
+      cumDist += haversineKm(prev[1], prev[0], pt[1], pt[0]);
+      points.push({ lat: pt[1], lng: pt[0], cumDist: cumDist });
+      prev = pt;
+    }
+    // Always include last point
+    var last = routeGeometry[routeGeometry.length - 1];
+    if (prev !== last) {
+      cumDist += haversineKm(prev[1], prev[0], last[1], last[0]);
+      points.push({ lat: last[1], lng: last[0], cumDist: cumDist });
+    }
+    return { points: points, totalDist: cumDist };
+  }
+
+  // Get how far along the route a point is (0 = start, 1 = end)
+  function getRouteProgress(routeData, lat, lng) {
+    if (!routeData) return null;
+    var bestDist = Infinity;
+    var bestCum = 0;
+    for (var i = 0; i < routeData.points.length; i++) {
+      var p = routeData.points[i];
+      var d = haversineKm(lat, lng, p.lat, p.lng);
+      if (d < bestDist) {
+        bestDist = d;
+        bestCum = p.cumDist;
+      }
+    }
+    return routeData.totalDist > 0 ? bestCum / routeData.totalDist : 0;
+  }
+
+  // ============================================================
+  // CHARGER CHAIN ALGORITHM
+  // ============================================================
+  function findChargerChain(start, end, stations, maxFirstLegKm, maxLegKm, routeGeometry) {
+    if (preferMajorStations) {
+      return findChargerChainSmart(start, end, stations, maxFirstLegKm, maxLegKm, routeGeometry);
+    }
+    return findChargerChainGreedy(start, end, stations, maxFirstLegKm, maxLegKm, routeGeometry);
+  }
+
+  // Original greedy: best progress along route (falls back to nearest-to-destination if no route data)
+  function findChargerChainGreedy(start, end, stations, maxFirstLegKm, maxLegKm, routeGeometry) {
+    var ROAD_FACTOR = 1.3;
+    var chain = [];
+    var visited = {};
+    var current = { lat: start.lat, lng: start.lng };
+    var maxIterations = 50;
+    var isFirstLeg = true;
+    var routeData = buildRouteProgress(routeGeometry);
+
+    for (var i = 0; i < maxIterations; i++) {
+      var thisLegMax = isFirstLeg ? maxFirstLegKm : maxLegKm;
+      var maxHaversine = thisLegMax / ROAD_FACTOR;
+      var distToEnd = haversineKm(current.lat, current.lng, end.lat, end.lng);
+
+      if (distToEnd <= maxHaversine) {
+        chain.push({ type: 'destination', dist: distToEnd });
+        return { feasible: true, chain: chain };
+      }
+
+      var reachable = [];
+      for (var s = 0; s < stations.length; s++) {
+        var st = stations[s];
+        if (visited[st.id]) continue;
+        var distToStation = haversineKm(current.lat, current.lng, st.lat, st.lng);
+        if (distToStation <= maxHaversine && distToStation > 1) {
+          reachable.push({
+            station: st,
+            distFromCurrent: distToStation,
+            distToEnd: haversineKm(st.lat, st.lng, end.lat, end.lng),
+            routeProgress: routeData ? getRouteProgress(routeData, st.lat, st.lng) : null,
+          });
+        }
+      }
+
+      if (reachable.length === 0) {
+        chain.push({ type: 'gap', from: current, distToEnd: distToEnd, maxRange: thisLegMax });
+        return { feasible: false, chain: chain };
+      }
+
+      // Sort by route progress (furthest along route first), fall back to nearest-to-destination
+      if (routeData) {
+        reachable.sort(function (a, b) { return b.routeProgress - a.routeProgress; });
+      } else {
+        reachable.sort(function (a, b) { return a.distToEnd - b.distToEnd; });
+      }
+      var best = reachable[0];
+      visited[best.station.id] = true;
+      isFirstLeg = false;
+
+      chain.push({
+        type: 'charger',
+        station: best.station,
+        dist: best.distFromCurrent,
+        risk: getRiskLevel(best.station),
+      });
+      current = { lat: best.station.lat, lng: best.station.lng };
+    }
+    return { feasible: false, chain: chain };
+  }
+
+  // Smart routing: prefer high-quality stations along the road route, willing to stop sooner or add stops
+  function findChargerChainSmart(start, end, stations, maxFirstLegKm, maxLegKm, routeGeometry) {
+    var ROAD_FACTOR = 1.3;
+    var DETOUR_TOLERANCE = 30; // km further from destination we'll accept for quality
+    var chain = [];
+    var visited = {};
+    var current = { lat: start.lat, lng: start.lng };
+    var maxIterations = 50;
+    var isFirstLeg = true;
+    var routeData = buildRouteProgress(routeGeometry);
+    var currentProgress = routeData ? getRouteProgress(routeData, start.lat, start.lng) : 0;
+
+    for (var i = 0; i < maxIterations; i++) {
+      var thisLegMax = isFirstLeg ? maxFirstLegKm : maxLegKm;
+      var maxHaversine = thisLegMax / ROAD_FACTOR;
+      var distToEnd = haversineKm(current.lat, current.lng, end.lat, end.lng);
+
+      if (distToEnd <= maxHaversine) {
+        chain.push({ type: 'destination', dist: distToEnd });
+        return { feasible: true, chain: chain };
+      }
+
+      // Gather all reachable chargers
+      var reachable = [];
+      for (var s = 0; s < stations.length; s++) {
+        var st = stations[s];
+        if (visited[st.id]) continue;
+        var distToStation = haversineKm(current.lat, current.lng, st.lat, st.lng);
+        if (distToStation <= maxHaversine && distToStation > 1) {
+          var distStationToEnd = haversineKm(st.lat, st.lng, end.lat, end.lng);
+          var progress = routeData ? getRouteProgress(routeData, st.lat, st.lng) : null;
+          reachable.push({
+            station: st,
+            distFromCurrent: distToStation,
+            distToEnd: distStationToEnd,
+            quality: getStationQuality(st),
+            routeProgress: progress,
+          });
+        }
+      }
+
+      if (reachable.length === 0) {
+        chain.push({ type: 'gap', from: current, distToEnd: distToEnd, maxRange: thisLegMax });
+        return { feasible: false, chain: chain };
+      }
+
+      // Sort by route progress (best forward progress along road), fall back to nearest-to-destination
+      if (routeData) {
+        // Only consider stations that make forward progress along the route
+        var forward = reachable.filter(function (r) {
+          return r.routeProgress > currentProgress - 0.02; // small tolerance for nearby stations
+        });
+        if (forward.length > 0) reachable = forward;
+
+        reachable.sort(function (a, b) { return b.routeProgress - a.routeProgress; });
+      } else {
+        reachable.sort(function (a, b) { return a.distToEnd - b.distToEnd; });
+      }
+
+      var nearest = reachable[0];
+      var baselineProgress = nearest.routeProgress;
+      var baselineDist = nearest.distToEnd;
+
+      // Consider all stations within detour tolerance
+      var candidates;
+      if (routeData && baselineProgress !== null) {
+        // Tolerance: stations within ~30km equivalent of route progress
+        var progressTolerance = routeData.totalDist > 0 ? DETOUR_TOLERANCE / routeData.totalDist : 0.05;
+        candidates = reachable.filter(function (r) {
+          return r.routeProgress >= baselineProgress - progressTolerance;
+        });
+      } else {
+        candidates = reachable.filter(function (r) {
+          return r.distToEnd <= baselineDist + DETOUR_TOLERANCE;
+        });
+      }
+      if (candidates.length === 0) candidates = [nearest];
+
+      // Among candidates, pick the highest quality
+      // If qualities are close (within 10 points), prefer further along route
+      candidates.sort(function (a, b) {
+        var qualDiff = b.quality - a.quality;
+        if (Math.abs(qualDiff) > 10) return qualDiff; // quality wins
+        if (routeData) return b.routeProgress - a.routeProgress; // tiebreak: further along route
+        return a.distToEnd - b.distToEnd; // tiebreak: closer to destination
+      });
+
+      var best = candidates[0];
+
+      // Extra check: if the best pick is low quality (< 15), see if we can stop
+      // sooner at a high-quality station instead (willing to add an extra stop)
+      if (best.quality < 15) {
+        // Look for a good station in the first 60% of our range
+        var earlyRange = maxHaversine * 0.6;
+        var earlyGood = reachable.filter(function (r) {
+          return r.distFromCurrent <= earlyRange && r.quality >= 30;
+        });
+        if (earlyGood.length > 0) {
+          // Pick the best quality early stop
+          earlyGood.sort(function (a, b) { return b.quality - a.quality; });
+          best = earlyGood[0];
+        }
+      }
+
+      visited[best.station.id] = true;
+      isFirstLeg = false;
+      if (routeData) currentProgress = best.routeProgress;
+
+      chain.push({
+        type: 'charger',
+        station: best.station,
+        dist: best.distFromCurrent,
+        risk: getRiskLevel(best.station),
+      });
+      current = { lat: best.station.lat, lng: best.station.lng };
+    }
+    return { feasible: false, chain: chain };
+  }
+
+  function formatDuration(seconds) {
+    var hrs = Math.floor(seconds / 3600);
+    var mins = Math.round((seconds % 3600) / 60);
+    if (hrs > 0) return hrs + 'h ' + mins + 'm';
+    return mins + ' min';
+  }
+
+  function formatChargerDetails(station, risk) {
+    var riskLabels = { green: 'Low risk', yellow: 'Moderate risk', red: 'High risk', blue: 'Level 2' };
+    var html = '<div class="route-stop-details">';
+    html += '<div class="route-detail-line">' + station.network + '</div>';
+    html += '<div class="route-detail-line">';
+    if (station.chargerLevel === 'DCFC') {
+      html += station.dcFastNum + ' DC fast';
+    } else {
+      html += station.level2Num + ' Level 2';
+    }
+    if (station.connectorTypes && station.connectorTypes.length > 0) {
+      // Filter out J1772 unless L2 stations are shown
+      var types = station.connectorTypes.filter(function (t) {
+        return showL2 || t !== 'J1772';
+      });
+      if (types.length > 0) {
+        html += ' · ' + types.join(', ');
+      }
+    }
+    html += '</div>';
+    html += '<div class="route-detail-line route-detail-risk" style="color:' + RISK_COLORS[risk].fillColor + '">' + riskLabels[risk] + '</div>';
+    html += '</div>';
+    return html;
+  }
+
+  function displayRouteResult(result, maxLegKm, osrmResult, osrmGap) {
+    var el = document.getElementById('route-result');
+    var html = '';
+
+    if (routeLineLayer) { map.removeLayer(routeLineLayer); routeLineLayer = null; }
+    if (routeStopMarkers) { map.removeLayer(routeStopMarkers); routeStopMarkers = null; }
+
+    routeLineLayer = L.layerGroup();
+    routeStopMarkers = L.layerGroup();
+
+    var stopNum = 0;
+    var hasRoadRoute = osrmResult && osrmResult.geometry;
+    var legIndex = 0;
+
+    // Show the effective range used for this route
+    var maxFirstLeg = getAdjustedRange(baseRangeKm, currentTemp) * (startingSoc - batteryReserve);
+    if (Math.round(maxFirstLeg) !== Math.round(maxLegKm)) {
+      html += '<div style="color:#aaa;font-size:0.75rem;margin-bottom:0.3rem;">First leg: ' + Math.round(maxFirstLeg) + ' km · After charging: ' + Math.round(maxLegKm) + ' km</div>';
+    } else {
+      html += '<div style="color:#aaa;font-size:0.75rem;margin-bottom:0.3rem;">Max range per leg: ' + Math.round(maxLegKm) + ' km</div>';
+    }
+
+    // Full battery range (100% SOC) adjusted for conditions
+    var fullRange = getAdjustedRange(baseRangeKm, currentTemp);
+    var currentSoc = startingSoc;
+
+    if (result.feasible) {
+      // Total distance and duration from OSRM if available
+      if (hasRoadRoute) {
+        var totalKm = Math.round(osrmResult.totalDistM / 1000);
+        var totalTime = formatDuration(osrmResult.totalDurS);
+        html += '<div class="route-feasible">Route is feasible!</div>';
+        html += '<div style="color:#999;font-size:0.8rem;">' + totalKm + ' km · ' + totalTime + ' drive</div>';
+      } else {
+        html += '<div class="route-feasible">Route is feasible!</div>';
+      }
+
+      html += '<div class="route-stop"><span class="stop-num" style="background:var(--color-green)">A</span> Start</div>';
+      html += '<div class="route-soc">Depart: ' + Math.round(currentSoc * 100) + '%</div>';
+
+      for (var i = 0; i < result.chain.length; i++) {
+        var c = result.chain[i];
+        if (c.type === 'charger') {
+          stopNum++;
+          var riskColor = RISK_COLORS[c.risk].fillColor;
+          var legDist = hasRoadRoute && osrmResult.legs[legIndex]
+            ? Math.round(osrmResult.legs[legIndex].distM / 1000)
+            : Math.round(c.dist);
+          var legTime = hasRoadRoute && osrmResult.legs[legIndex]
+            ? formatDuration(osrmResult.legs[legIndex].durS)
+            : '';
+          legIndex++;
+
+          var socUsed = legDist / fullRange;
+          var arrivalSoc = currentSoc - socUsed;
+          var arrivalPct = Math.max(0, Math.round(arrivalSoc * 100));
+          currentSoc = chargeToSoc;
+
+          html += '<div class="route-leg">↓ ' + legDist + ' km' + (legTime ? ' · ' + legTime : '') + '</div>';
+          html += '<div class="route-stop"><span class="stop-num" style="background:' + riskColor + '">' + stopNum + '</span> ' + c.station.name + '</div>';
+          html += formatChargerDetails(c.station, c.risk);
+          html += '<div class="route-soc">';
+          html += '<span class="' + (arrivalPct <= Math.round(batteryReserve * 100) ? 'soc-warning' : '') + '">Arrive: ' + arrivalPct + '%</span>';
+          html += ' → Depart: ' + Math.round(currentSoc * 100) + '%';
+          html += '</div>';
+
+          var stopMarker = L.marker([c.station.lat, c.station.lng], {
+            icon: L.divIcon({
+              className: 'route-icon route-icon-stop',
+              html: String(stopNum),
+              iconSize: [22, 22],
+              iconAnchor: [11, 11],
+            }),
+            zIndexOffset: 1000,
+          });
+          routeStopMarkers.addLayer(stopMarker);
+        } else if (c.type === 'destination') {
+          var legDist = hasRoadRoute && osrmResult.legs[legIndex]
+            ? Math.round(osrmResult.legs[legIndex].distM / 1000)
+            : Math.round(c.dist);
+          var legTime = hasRoadRoute && osrmResult.legs[legIndex]
+            ? formatDuration(osrmResult.legs[legIndex].durS)
+            : '';
+
+          var socUsed = legDist / fullRange;
+          var arrivalSoc = currentSoc - socUsed;
+          var arrivalPct = Math.max(0, Math.round(arrivalSoc * 100));
+
+          html += '<div class="route-leg">↓ ' + legDist + ' km' + (legTime ? ' · ' + legTime : '') + '</div>';
+          html += '<div class="route-stop"><span class="stop-num" style="background:var(--color-btn)">B</span> Destination</div>';
+          html += '<div class="route-soc"><span class="' + (arrivalPct <= Math.round(batteryReserve * 100) ? 'soc-warning' : '') + '">Arrive: ' + arrivalPct + '%</span></div>';
+        }
+      }
+
+      if (stopNum === 0) {
+        html += '<div style="color:#999;font-size:0.8rem;margin-top:0.3rem;">Direct — no charging stops needed</div>';
+      } else {
+        html += '<div style="color:#999;font-size:0.8rem;margin-top:0.3rem;">' + stopNum + ' charging stop' + (stopNum > 1 ? 's' : '') + '</div>';
+      }
+
+      // Draw green road route
+      if (hasRoadRoute) {
+        var roadPoints = osrmResult.geometry.map(function (c) { return [c[1], c[0]]; });
+        L.polyline(roadPoints, { color: '#2ecc40', weight: 4, opacity: 0.8 }).addTo(routeLineLayer);
+      } else {
+        var points = [[routeStart.lat, routeStart.lng]];
+        for (var i = 0; i < result.chain.length; i++) {
+          if (result.chain[i].type === 'charger') points.push([result.chain[i].station.lat, result.chain[i].station.lng]);
+        }
+        points.push([routeEnd.lat, routeEnd.lng]);
+        L.polyline(points, { color: '#2ecc40', weight: 3, opacity: 0.8 }).addTo(routeLineLayer);
+      }
+
+    } else {
+      html += '<div class="route-impossible">Route not feasible</div>';
+      html += '<div class="route-infeasible-msg">This route can\'t be completed with your current settings. '
+        + 'Try increasing range, raising temperature, lowering speed, or adjusting battery settings.</div>';
+
+      // Show the feasible charger stops before the gap
+      html += '<div class="route-stop"><span class="stop-num" style="background:var(--color-green)">A</span> Start</div>';
+      html += '<div class="route-soc">Depart: ' + Math.round(currentSoc * 100) + '%</div>';
+
+      var hasFeasibleRoute = osrmResult && osrmResult.geometry;
+
+      for (var i = 0; i < result.chain.length; i++) {
+        var c = result.chain[i];
+        if (c.type === 'charger') {
+          stopNum++;
+          var riskColor = RISK_COLORS[c.risk].fillColor;
+          var legDist = hasFeasibleRoute && osrmResult.legs[legIndex]
+            ? Math.round(osrmResult.legs[legIndex].distM / 1000)
+            : Math.round(c.dist);
+          var legTime = hasFeasibleRoute && osrmResult.legs[legIndex]
+            ? formatDuration(osrmResult.legs[legIndex].durS)
+            : '';
+          legIndex++;
+
+          var socUsed = legDist / fullRange;
+          var arrivalSoc = currentSoc - socUsed;
+          var arrivalPct = Math.max(0, Math.round(arrivalSoc * 100));
+          currentSoc = chargeToSoc;
+
+          html += '<div class="route-leg route-leg-ok">↓ ' + legDist + ' km' + (legTime ? ' · ' + legTime : '') + '</div>';
+          html += '<div class="route-stop"><span class="stop-num" style="background:' + riskColor + '">' + stopNum + '</span> ' + c.station.name + '</div>';
+          html += formatChargerDetails(c.station, c.risk);
+          html += '<div class="route-soc">';
+          html += '<span class="' + (arrivalPct <= Math.round(batteryReserve * 100) ? 'soc-warning' : '') + '">Arrive: ' + arrivalPct + '%</span>';
+          html += ' → Depart: ' + Math.round(currentSoc * 100) + '%';
+          html += '</div>';
+
+          var stopMarker = L.marker([c.station.lat, c.station.lng], {
+            icon: L.divIcon({
+              className: 'route-icon route-icon-stop',
+              html: String(stopNum),
+              iconSize: [22, 22],
+              iconAnchor: [11, 11],
+            }),
+            zIndexOffset: 1000,
+          });
+          routeStopMarkers.addLayer(stopMarker);
+        } else if (c.type === 'gap') {
+          var gapDist = osrmGap && osrmGap.totalDistM
+            ? Math.round(osrmGap.totalDistM / 1000)
+            : Math.round(c.distToEnd);
+          html += '<div class="route-leg route-leg-gap">⚠ ' + gapDist + ' km gap — no reachable charger (max range: ' + Math.round(c.maxRange) + ' km)</div>';
+          html += '<div class="route-stop"><span class="stop-num" style="background:var(--color-btn)">B</span> Destination</div>';
+        }
+      }
+
+      // Draw feasible portion in green
+      if (hasFeasibleRoute) {
+        var greenPoints = osrmResult.geometry.map(function (c) { return [c[1], c[0]]; });
+        L.polyline(greenPoints, { color: '#2ecc40', weight: 4, opacity: 0.8 }).addTo(routeLineLayer);
+      }
+
+      // Draw gap portion in red dashed
+      if (osrmGap && osrmGap.geometry) {
+        var redPoints = osrmGap.geometry.map(function (c) { return [c[1], c[0]]; });
+        L.polyline(redPoints, { color: '#ff4136', weight: 4, opacity: 0.7, dashArray: '10, 8' }).addTo(routeLineLayer);
+      } else {
+        // Fallback: straight dashed line for the gap
+        var lastCharger = null;
+        for (var i = result.chain.length - 1; i >= 0; i--) {
+          if (result.chain[i].type === 'charger') {
+            lastCharger = result.chain[i].station;
+            break;
+          }
+        }
+        var gapStart = lastCharger
+          ? [lastCharger.lat, lastCharger.lng]
+          : [routeStart.lat, routeStart.lng];
+        L.polyline([gapStart, [routeEnd.lat, routeEnd.lng]], {
+          color: '#ff4136', weight: 3, opacity: 0.5, dashArray: '8, 8'
+        }).addTo(routeLineLayer);
+      }
+    }
+
+    routeLineLayer.addTo(map);
+    routeStopMarkers.addTo(map);
+
+    el.innerHTML = html;
+    el.classList.remove('hidden');
+    document.getElementById('route-clear').classList.remove('hidden');
+    exitRouteMode();
+  }
+
+  // ============================================================
+  // DEFAULTS, RESET & URL STATE
+  // ============================================================
+  var DEFAULTS = {
+    range: 450, speed: 120, temp: 0, soc: 80, reserve: 20, chargeTo: 80, preferMajor: true,
+    mode: 'roundtrip', safe: false, l2: false, opacity: 40
+  };
+
+  function applyState(s) {
+    baseRangeKm = s.range;
+    currentSpeed = s.speed;
+    currentTemp = s.temp;
+    startingSoc = s.soc / 100;
+    batteryReserve = s.reserve / 100;
+    chargeToSoc = s.chargeTo / 100;
+    preferMajorStations = s.preferMajor;
+    rangeMode = s.mode;
+    safeRoute = s.safe;
+    showL2 = s.l2;
+    overlayOpacity = s.opacity / 100;
+
+    // Update UI controls
+    document.getElementById('range-input').value = s.range;
+    document.getElementById('speed-slider').value = s.speed;
+    document.getElementById('temp-slider').value = s.temp;
+    document.getElementById('soc-slider').value = s.soc;
+    document.getElementById('reserve-slider').value = s.reserve;
+    document.getElementById('charge-to-slider').value = s.chargeTo;
+    document.getElementById('prefer-major-toggle').checked = s.preferMajor;
+    document.getElementById('opacity-slider').value = s.opacity;
+    document.querySelector('input[name="range-mode"][value="' + s.mode + '"]').checked = true;
+    document.getElementById('safe-route-toggle').checked = s.safe;
+    document.getElementById('show-l2-toggle').checked = s.l2;
+    document.getElementById('soc-value').textContent = s.soc + '%';
+    document.getElementById('reserve-value').textContent = s.reserve + '%';
+    document.getElementById('charge-to-value').textContent = s.chargeTo + '%';
+    document.getElementById('opacity-value').textContent = s.opacity + '%';
+
+    updateSpeedDisplay();
+    updateTempDisplay();
+    updateBatteryInfo();
+    refresh();
+  }
+
+  function resetDefaults() {
+    applyState(DEFAULTS);
+    pushURL();
+  }
+
+  function pushURL() {
+    var p = new URLSearchParams();
+    if (baseRangeKm !== DEFAULTS.range) p.set('range', baseRangeKm);
+    if (currentSpeed !== DEFAULTS.speed) p.set('speed', currentSpeed);
+    if (currentTemp !== DEFAULTS.temp) p.set('temp', currentTemp);
+    if (Math.round(startingSoc * 100) !== DEFAULTS.soc) p.set('soc', Math.round(startingSoc * 100));
+    if (Math.round(batteryReserve * 100) !== DEFAULTS.reserve) p.set('reserve', Math.round(batteryReserve * 100));
+    if (Math.round(chargeToSoc * 100) !== DEFAULTS.chargeTo) p.set('chargeTo', Math.round(chargeToSoc * 100));
+    if (preferMajorStations !== DEFAULTS.preferMajor) p.set('preferMajor', '0');
+    if (rangeMode !== DEFAULTS.mode) p.set('mode', rangeMode);
+    if (safeRoute !== DEFAULTS.safe) p.set('safe', '1');
+    if (showL2 !== DEFAULTS.l2) p.set('l2', '1');
+    if (Math.round(overlayOpacity * 100) !== DEFAULTS.opacity) p.set('opacity', Math.round(overlayOpacity * 100));
+    var qs = p.toString();
+    var url = window.location.pathname + (qs ? '?' + qs : '');
+    history.replaceState(null, '', url);
+  }
+
+  function loadFromURL() {
+    var p = new URLSearchParams(window.location.search);
+    return {
+      range: parseInt(p.get('range')) || DEFAULTS.range,
+      speed: parseInt(p.get('speed')) || DEFAULTS.speed,
+      temp: p.has('temp') ? parseInt(p.get('temp')) : DEFAULTS.temp,
+      soc: parseInt(p.get('soc')) || DEFAULTS.soc,
+      reserve: p.has('reserve') ? parseInt(p.get('reserve')) : DEFAULTS.reserve,
+      chargeTo: parseInt(p.get('chargeTo')) || DEFAULTS.chargeTo,
+      preferMajor: p.has('preferMajor') ? p.get('preferMajor') !== '0' : DEFAULTS.preferMajor,
+      mode: p.get('mode') || DEFAULTS.mode,
+      safe: p.get('safe') === '1',
+      l2: p.get('l2') === '1',
+      opacity: parseInt(p.get('opacity')) || DEFAULTS.opacity,
+    };
   }
 
   // ============================================================
@@ -577,10 +1669,7 @@
       console.log('[EV] Loaded ' + chargers.length + ' chargers');
 
       wireEvents();
-      updateSpeedDisplay();
-      updateTempDisplay();
-      updateBatteryInfo();
-      refresh();
+      applyState(loadFromURL());
       console.log('[EV] Init complete');
     } catch (err) {
       console.error('[EV] Init failed:', err);
