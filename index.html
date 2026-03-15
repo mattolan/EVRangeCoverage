@@ -20,16 +20,22 @@
 
       <h3>Charger Station Data</h3>
       <p>
-        Charging station locations are sourced from the
-        <a href="https://developer.nrel.gov/docs/transportation/alt-fuel-stations-v1/" target="_blank" rel="noopener">
-        U.S. Department of Energy — Alternative Fuel Stations API</a>,
-        maintained by the <strong>National Renewable Energy Laboratory (NREL)</strong>
-        as part of the <a href="https://afdc.energy.gov/" target="_blank" rel="noopener">Alternative Fuels Data Center (AFDC)</a>.
+        Charging station data is sourced from two providers:
       </p>
+      <ul>
+        <li><strong>Primary:</strong> <a href="https://developer.nrel.gov/docs/transportation/alt-fuel-stations-v1/" target="_blank" rel="noopener">NREL Alternative Fuels Station Locator</a> — maintained by the National Renewable Energy Laboratory as part of the <a href="https://afdc.energy.gov/" target="_blank" rel="noopener">Alternative Fuels Data Center (AFDC)</a>.</li>
+        <li><strong>Supplemental:</strong> <a href="https://openchargemap.org/" target="_blank" rel="noopener">Open Charge Map</a> — a community-driven, non-profit charger database that fills in missing stations and power ratings.</li>
+      </ul>
       <p>
-        The dataset includes public EV charging stations in Alberta, Canada, filtered
-        to DC Fast Charging (DCFC) and Level 2 stations. Data was last exported on
-        <strong>March 8, 2026</strong>.
+        The merged dataset includes 938 public EV charging stations in Alberta with power ratings (kW) for 90% of stations.
+        Data was last refreshed on <strong>March 14, 2026</strong>.
+      </p>
+
+      <h3>Route Planner</h3>
+      <p>
+        Road-following routes are provided by the <a href="https://project-osrm.org/" target="_blank" rel="noopener">OSRM demo server</a> (Open Source Routing Machine).
+        Charging time estimates are based on battery size, state of charge, and the station's maximum power rating.
+        Estimates assume constant power delivery and do not account for charging curve taper above 80% SOC.
       </p>
 
       <h3>Map Tiles</h3>

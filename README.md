@@ -44,20 +44,28 @@ Then open `http://localhost:8000` in your browser.
 - **Tesla access warnings** — flags older Tesla stations (<200 kW) that may have third-party access restrictions
 
 ### Charger Data
-- **883 stations** from NREL AFDC (Alternative Fuels Station Locator)
-- **Power ratings** (kW) for 77% of stations
+- **938 stations** from two sources: NREL AFDC (primary) + Open Charge Map (supplemental)
+- **Power ratings** (kW) for 90% of stations
 - **Connector types** — CCS, NACS, CHAdeMO, J1772
-- **Refreshable** — run `node scripts/fetch-chargers.js [API_KEY]` to pull latest data
+- **Refreshable** — run the fetch scripts to pull latest data from both sources
 
 ## Data
 
-- `data/chargers.json` — 883 Alberta charging stations from NREL AFDC
+- `data/chargers.json` — 938 Alberta charging stations (NREL AFDC + Open Charge Map merged)
 - `data/vehicles.json` — popular EV models with rated range and battery capacity
-- `scripts/fetch-chargers.js` — data refresh script (requires free NREL API key from https://developer.nrel.gov/signup/)
+- `scripts/fetch-chargers.js` — primary data from NREL AFDC (free API key from https://developer.nrel.gov/signup/)
+- `scripts/merge-ocm.js` — merges Open Charge Map data to fill gaps and add missing stations/power ratings (free API key from https://openchargemap.org/site/profile/register)
+
+### Data Refresh
+```bash
+node scripts/fetch-chargers.js <NREL_API_KEY>    # Fetch primary data
+node scripts/merge-ocm.js <OCM_API_KEY>          # Merge supplemental data
+```
 
 ## Tech Stack
 
 - **Leaflet.js** + OpenStreetMap tiles for mapping
 - **OSRM demo server** for road-following route geometry (free, no API key, rate-limited)
-- **NREL AFDC API** for charger data
+- **NREL AFDC API** for primary charger data
+- **Open Charge Map API** for supplemental charger data and power ratings
 - Vanilla HTML/CSS/JS — no framework, no bundler, no backend

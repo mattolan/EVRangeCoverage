@@ -36,6 +36,25 @@
     "status": "operational"
   },
   {
+    "id": "ocm-250615",
+    "name": "17820 Stony Plain Road",
+    "lat": 53.542017,
+    "lng": -113.629864,
+    "address": "17820 Stony Plain Road, Edmonton, AB",
+    "network": "Electrify Canada",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "CHAdeMO",
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 2,
+    "level2Num": 0,
+    "level1Num": 0,
+    "maxPowerKw": 40,
+    "status": "operational"
+  },
+  {
     "id": "nrel-153427",
     "name": "179 Leva Ave - Tesla Supercharger",
     "lat": 52.216416,
@@ -44,7 +63,8 @@
     "network": "Tesla",
     "connectorCount": 8,
     "connectorTypes": [
-      "NACS"
+      "CHAdeMO",
+      "CCS"
     ],
     "chargerLevel": "DCFC",
     "dcFastNum": 8,
@@ -433,7 +453,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -453,6 +473,114 @@
     "level2Num": 0,
     "level1Num": 0,
     "maxPowerKw": 99,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-295711",
+    "name": "AMA Admin",
+    "lat": 53.477543,
+    "lng": -113.493461,
+    "address": "10310 G.A. MacDonald Avenue NW, Alberta, AB",
+    "network": "Non-Networked",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-295705",
+    "name": "AMA Camrose",
+    "lat": 53.018472,
+    "lng": -112.857189,
+    "address": "6702 48 Avenue, Camrose, AB",
+    "network": "Non-Networked",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-295689",
+    "name": "AMA Crowfoot",
+    "lat": 51.128373,
+    "lng": -114.198202,
+    "address": "220 Crowfoot Crescent NW, Calgary, AB",
+    "network": "Non-Networked",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-295717",
+    "name": "AMA Kingsway",
+    "lat": 53.561587,
+    "lng": -113.509193,
+    "address": "11220, 109 st, NW, EDMONTON, AB",
+    "network": "Non-Networked",
+    "connectorCount": 4,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 4,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-283729",
+    "name": "AMA Manning Charging Station",
+    "lat": 53.6019609,
+    "lng": -113.4198816,
+    "address": "5040 Manning Dr, Edmonton, AB",
+    "network": "Non-Networked",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-295713",
+    "name": "AMA Sherwood Park",
+    "lat": 53.54218,
+    "lng": -113.30754,
+    "address": "101Bremner Dr. #19, Sherwood Park, AB",
+    "network": "Non-Networked",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -614,7 +742,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -650,7 +778,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -668,7 +796,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -686,7 +814,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -813,7 +941,7 @@
     "dcFastNum": 0,
     "level2Num": 8,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -903,7 +1031,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -977,7 +1105,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -1031,7 +1159,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -1049,7 +1177,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -1068,6 +1196,24 @@
     "level2Num": 0,
     "level1Num": 0,
     "maxPowerKw": 100,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-384954",
+    "name": "Association of Alberta Municipalities",
+    "lat": 53.61696311,
+    "lng": -113.5925243,
+    "address": "15520 Campbell Rd, St. Albert, AB",
+    "network": "Non-Networked",
+    "connectorCount": 4,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 4,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -1322,7 +1468,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -1344,6 +1490,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-112181",
+    "name": "Best Western Plus Edmonton Airport Hotel",
+    "lat": 53.271397,
+    "lng": -113.550828,
+    "address": "5705 50th St, Leduc, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
     "id": "nrel-116287",
     "name": "Best Western Plus Lacombe Inn & Suites - Tesla Destination",
     "lat": 52.461201,
@@ -1359,7 +1523,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 16,
     "status": "operational"
   },
   {
@@ -1388,6 +1552,24 @@
     "lng": -113.558316,
     "address": "5207 50th Ave, Leduc, AB",
     "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 7.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-191619",
+    "name": "Big Rock Chrysler Dodge Jeep Ram",
+    "lat": 53.4051275,
+    "lng": -117.5555611,
+    "address": "186 Tocher Ave, Hinton, Alberta",
+    "network": "ChargePoint Network",
     "connectorCount": 1,
     "connectorTypes": [
       "J1772"
@@ -1494,6 +1676,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-234760",
+    "name": "BONNYVILLE COMP STATION 1",
+    "lat": 54.265423,
+    "lng": -110.73713,
+    "address": "4705 49 St, Bonnyville, AB",
+    "network": "Tesla",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
     "id": "nrel-200528",
     "name": "Boston Pizza - Tesla Supercharger",
     "lat": 53.58557,
@@ -1502,7 +1702,8 @@
     "network": "Tesla",
     "connectorCount": 6,
     "connectorTypes": [
-      "NACS"
+      "CCS",
+      "CHAdeMO"
     ],
     "chargerLevel": "DCFC",
     "dcFastNum": 6,
@@ -1545,6 +1746,24 @@
     "level2Num": 2,
     "level1Num": 0,
     "maxPowerKw": 13.4,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-250539",
+    "name": "BOW VALLEY BVS",
+    "lat": 51.048155,
+    "lng": -114.06727,
+    "address": "255 5 Ave SW, Calgary, AB",
+    "network": "Tesla",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -3092,6 +3311,7 @@
     "network": "FLO",
     "connectorCount": 1,
     "connectorTypes": [
+      "J1772",
       "CHAdeMO",
       "CCS"
     ],
@@ -3208,7 +3428,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 16,
     "status": "operational"
   },
   {
@@ -3244,7 +3464,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -3330,7 +3550,8 @@
     "network": "Tesla",
     "connectorCount": 6,
     "connectorTypes": [
-      "NACS"
+      "CHAdeMO",
+      "CCS"
     ],
     "chargerLevel": "DCFC",
     "dcFastNum": 6,
@@ -3355,6 +3576,25 @@
     "level2Num": 0,
     "level1Num": 0,
     "maxPowerKw": 350,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-250603",
+    "name": "Canadian Tire Corp",
+    "lat": 53.452959809491716,
+    "lng": -113.48888813819786,
+    "address": "2110 101 St NW, Edmonton, AB",
+    "network": "Electrify Canada",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "CHAdeMO",
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 2,
+    "level2Num": 0,
+    "level1Num": 0,
+    "maxPowerKw": 50,
     "status": "operational"
   },
   {
@@ -3720,6 +3960,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-304275",
+    "name": "ChargeStop",
+    "lat": 53.5490017,
+    "lng": -113.6210724,
+    "address": "8106 99 Street Northwest, Edmonton, AB",
+    "network": "ChargePoint Network",
+    "connectorCount": 5,
+    "connectorTypes": [
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 5,
+    "level2Num": 0,
+    "level1Num": 0,
+    "maxPowerKw": 300,
+    "status": "operational"
+  },
+  {
     "id": "nrel-356071",
     "name": "ChargeStop Edmonton",
     "lat": 53.51728521,
@@ -3927,7 +4185,8 @@
     "network": "FLO",
     "connectorCount": 2,
     "connectorTypes": [
-      "J1772"
+      "CHAdeMO",
+      "CCS"
     ],
     "chargerLevel": "L2",
     "dcFastNum": 0,
@@ -4008,7 +4267,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 16,
     "status": "operational"
   },
   {
@@ -4173,7 +4432,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -4278,7 +4537,8 @@
     "network": "Tesla",
     "connectorCount": 6,
     "connectorTypes": [
-      "NACS"
+      "CCS",
+      "CHAdeMO"
     ],
     "chargerLevel": "DCFC",
     "dcFastNum": 6,
@@ -4351,7 +4611,9 @@
     "network": "FLO",
     "connectorCount": 2,
     "connectorTypes": [
-      "J1772"
+      "J1772",
+      "CHAdeMO",
+      "CCS"
     ],
     "chargerLevel": "L2",
     "dcFastNum": 0,
@@ -4414,7 +4676,7 @@
     "dcFastNum": 0,
     "level2Num": 9,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 17,
     "status": "operational"
   },
   {
@@ -4433,7 +4695,7 @@
     "dcFastNum": 0,
     "level2Num": 12,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 17,
     "status": "operational"
   },
   {
@@ -4452,7 +4714,7 @@
     "dcFastNum": 0,
     "level2Num": 21,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 17,
     "status": "operational"
   },
   {
@@ -4464,7 +4726,9 @@
     "network": "Tesla",
     "connectorCount": 8,
     "connectorTypes": [
-      "NACS"
+      "J1772",
+      "CHAdeMO",
+      "CCS"
     ],
     "chargerLevel": "DCFC",
     "dcFastNum": 8,
@@ -4608,13 +4872,14 @@
     "network": "Non-Networked",
     "connectorCount": 1,
     "connectorTypes": [
-      "J1772"
+      "CHAdeMO",
+      "CCS"
     ],
     "chargerLevel": "L2",
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -4670,7 +4935,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 16,
     "status": "operational"
   },
   {
@@ -4818,6 +5083,42 @@
     "level2Num": 2,
     "level1Num": 0,
     "maxPowerKw": 6.5,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-84542",
+    "name": "Devon Tower",
+    "lat": 51.0510198,
+    "lng": -114.0708042,
+    "address": "400 3 Ave SW, Calgary, Alberta",
+    "network": "Tesla",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 1,
+    "maxPowerKw": 6.6,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-278450",
+    "name": "DISTRICT DISTRICT 3",
+    "lat": 51.045952,
+    "lng": -114.08048,
+    "address": "825 8 Ave SW, Calgary, AB",
+    "network": "Tesla",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -4999,7 +5300,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 16,
     "status": "operational"
   },
   {
@@ -5072,7 +5373,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5090,7 +5391,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5108,7 +5409,7 @@
     "dcFastNum": 0,
     "level2Num": 8,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5268,8 +5569,9 @@
     "network": "Tesla",
     "connectorCount": 12,
     "connectorTypes": [
+      "NACS",
       "CCS",
-      "NACS"
+      "J1772"
     ],
     "chargerLevel": "DCFC",
     "dcFastNum": 12,
@@ -5328,6 +5630,25 @@
     ],
     "chargerLevel": "DCFC",
     "dcFastNum": 1,
+    "level2Num": 0,
+    "level1Num": 0,
+    "maxPowerKw": 50,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-234717",
+    "name": "EPCOR - DCFC 2 - Blatchford",
+    "lat": 53.569275,
+    "lng": -113.5228052,
+    "address": "530 de la Montagne, Edmonton, AB",
+    "network": "Electrify Canada",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "CHAdeMO",
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 2,
     "level2Num": 0,
     "level1Num": 0,
     "maxPowerKw": 50,
@@ -5655,7 +5976,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5675,6 +5996,25 @@
     "level2Num": 6,
     "level1Num": 0,
     "maxPowerKw": null,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-250573",
+    "name": "Federated Co-operatives Ltd (FCL)",
+    "lat": 51.7936843,
+    "lng": -114.0389237,
+    "address": "3 32580 Range Rd 11, Olds, AB",
+    "network": "Non-Networked",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "CHAdeMO",
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 2,
+    "level2Num": 0,
+    "level1Num": 0,
+    "maxPowerKw": 50,
     "status": "operational"
   },
   {
@@ -5782,7 +6122,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5836,7 +6176,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5872,7 +6212,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5890,7 +6230,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5926,7 +6266,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5944,7 +6284,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5962,7 +6302,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -5998,7 +6338,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -6184,7 +6524,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -6401,7 +6741,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -6497,6 +6837,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-234716",
+    "name": "Great Canadian Solar",
+    "lat": 53.5684241526189,
+    "lng": -113.572404890217,
+    "address": "14576 116 Ave NW, Edmonton, AB",
+    "network": "FLO",
+    "connectorCount": 3,
+    "connectorTypes": [
+      "NACS"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 3,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
     "id": "nrel-387213",
     "name": "Great White Car Wash - Tesla Supercharger",
     "lat": 51.098129,
@@ -6529,7 +6887,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -6547,7 +6905,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -6565,7 +6923,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -6605,6 +6963,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-90215",
+    "name": "Guest House Inn & Suites",
+    "lat": 53.58625432720808,
+    "lng": -116.4175078360123,
+    "address": "Guest House Inn & Suites, Edson, AB",
+    "network": "FLO",
+    "connectorCount": 3,
+    "connectorTypes": [
+      "NACS"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 3,
+    "level1Num": 0,
+    "maxPowerKw": 16,
+    "status": "operational"
+  },
+  {
     "id": "nrel-116283",
     "name": "Guest House Inn & Suites - Tesla Destination",
     "lat": 53.572021,
@@ -6619,7 +6995,7 @@
     "dcFastNum": 0,
     "level2Num": 3,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -6656,7 +7032,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -6693,7 +7069,7 @@
     "dcFastNum": 0,
     "level2Num": 3,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 16,
     "status": "operational"
   },
   {
@@ -6928,7 +7304,7 @@
     "dcFastNum": 0,
     "level2Num": 3,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 16,
     "status": "operational"
   },
   {
@@ -6982,7 +7358,7 @@
     "dcFastNum": 0,
     "level2Num": 6,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 7.7,
     "status": "operational"
   },
   {
@@ -7325,7 +7701,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -7361,7 +7737,7 @@
     "dcFastNum": 0,
     "level2Num": 20,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -7379,7 +7755,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -7397,7 +7773,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -7415,7 +7791,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -7433,7 +7809,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -7451,7 +7827,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -8063,7 +8439,7 @@
     "dcFastNum": 0,
     "level2Num": 6,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -8081,7 +8457,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -8117,7 +8493,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -8244,7 +8620,7 @@
     "dcFastNum": 0,
     "level2Num": 6,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -8478,7 +8854,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 50,
     "status": "operational"
   },
   {
@@ -8551,7 +8927,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -8569,7 +8945,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -9021,7 +9397,25 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112170",
+    "name": "Main Street Hardware",
+    "lat": 52.378708,
+    "lng": -113.795671,
+    "address": "4910 Broadway Ave, Blackfalds, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -9151,6 +9545,22 @@
     "status": "operational"
   },
   {
+    "id": "ocm-23328",
+    "name": "Market Mall Parkade",
+    "lat": 51.0829884664771,
+    "lng": -114.155639719302,
+    "address": "3625 Shaganappi Trail Northwest, Calgary, Alberta",
+    "network": "ChargePoint Network",
+    "connectorCount": 2,
+    "connectorTypes": [],
+    "chargerLevel": "L1",
+    "dcFastNum": 0,
+    "level2Num": 0,
+    "level1Num": 2,
+    "maxPowerKw": 2,
+    "status": "operational"
+  },
+  {
     "id": "nrel-205030",
     "name": "MB Lone Star",
     "lat": 50.9858704,
@@ -9195,7 +9605,9 @@
     "network": "FLO",
     "connectorCount": 2,
     "connectorTypes": [
-      "J1772"
+      "J1772",
+      "CHAdeMO",
+      "CCS"
     ],
     "chargerLevel": "L2",
     "dcFastNum": 0,
@@ -9312,7 +9724,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -9631,6 +10043,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-384790",
+    "name": "NAVCANADA (AB) YEG ACC 2",
+    "lat": 53.311894,
+    "lng": -113.578512,
+    "address": "4396 34 Street East, Nisku, AB",
+    "network": "Tesla",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
     "id": "nrel-302306",
     "name": "Nikka Yuko Japanese Gardens Parking",
     "lat": 49.6869616,
@@ -9773,7 +10203,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -9827,7 +10257,25 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112207",
+    "name": "NORTH SIDE MITS REPAIRSHOPEVSE",
+    "lat": 53.582788,
+    "lng": -113.491145,
+    "address": "9670 125a Ave NW, Edmonton, AB",
+    "network": "Tesla",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -9864,6 +10312,24 @@
     "level2Num": 2,
     "level1Num": 0,
     "maxPowerKw": 6.5,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-283707",
+    "name": "NORTHHILL OUTSIDE",
+    "lat": 51.062907,
+    "lng": -114.062776,
+    "address": "1211 Centre St NW, Calgary, AB",
+    "network": "Tesla",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -9955,7 +10421,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -9973,7 +10439,26 @@
     "dcFastNum": 0,
     "level2Num": 3,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 13,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-384534",
+    "name": "On the Run EV Fast Charge",
+    "lat": 51.16243,
+    "lng": -114.849212,
+    "address": "100 Kananaskis Trail, Morley, AB",
+    "network": "Non-Networked",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "CHAdeMO",
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 2,
+    "level2Num": 0,
+    "level1Num": 0,
+    "maxPowerKw": 50,
     "status": "operational"
   },
   {
@@ -10447,6 +10932,24 @@
     "level2Num": 2,
     "level1Num": 0,
     "maxPowerKw": 7.2,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-283727",
+    "name": "Parkwest Business Center 2",
+    "lat": 53.577213,
+    "lng": -113.579106,
+    "address": "12340 149 Street, Edmonton, AB",
+    "network": "Electrify Canada",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -10986,7 +11489,224 @@
     "dcFastNum": 0,
     "level2Num": 3,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112180",
+    "name": "Peavey Mart",
+    "lat": 53.265794,
+    "lng": -113.568558,
+    "address": "5301 Discovery Way, Leduc, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112174",
+    "name": "Peavey Mart",
+    "lat": 52.959878,
+    "lng": -113.394014,
+    "address": "5710 40th Ave, Wetaskiwin, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112176",
+    "name": "Peavey Mart",
+    "lat": 53.019296,
+    "lng": -112.854188,
+    "address": "4815 66 St, Camrose, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112218",
+    "name": "Peavey Mart",
+    "lat": 54.151088,
+    "lng": -113.852204,
+    "address": "10211 100 St, Westlock, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112195",
+    "name": "Peavey Mart",
+    "lat": 53.498559,
+    "lng": -112.062161,
+    "address": "5338 50th Ave, Vegreville, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112171",
+    "name": "Peavey Mart",
+    "lat": 52.467092,
+    "lng": -113.724817,
+    "address": "5230 45th St, Lacombe, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112168",
+    "name": "Peavey Mart",
+    "lat": 52.325027,
+    "lng": -112.734922,
+    "address": "6690 50th Ave, Stettler, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-145831",
+    "name": "Peavey Mart",
+    "lat": 52.242732,
+    "lng": -113.815179,
+    "address": "2410 50 Ave, Red Deer, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112169",
+    "name": "Peavey Mart",
+    "lat": 52.377098,
+    "lng": -114.918778,
+    "address": "5127 50th St, Rocky Mountain House, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112182",
+    "name": "Peavey Mart",
+    "lat": 53.278471,
+    "lng": -110.059243,
+    "address": "7802 44th St, Lloydminster, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-112141",
+    "name": "Peavey Mart",
+    "lat": 51.0380370519,
+    "lng": -113.37476296,
+    "address": "300 Edgefield Pl, Strathmore, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-148256",
+    "name": "Petro Canada 42148 AB-1",
+    "lat": 51.0885616812902,
+    "lng": -114.4745423164162,
+    "address": "42148 AB-1, Calgary, Alberta",
+    "network": "Non-Networked",
+    "connectorCount": 4,
+    "connectorTypes": [
+      "CHAdeMO",
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 4,
+    "level2Num": 0,
+    "level1Num": 0,
+    "maxPowerKw": 200,
     "status": "operational"
   },
   {
@@ -11004,7 +11724,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 20,
     "status": "operational"
   },
   {
@@ -11223,6 +11943,7 @@
     "network": "ChargePoint Network",
     "connectorCount": 2,
     "connectorTypes": [
+      "CHAdeMO",
       "CCS"
     ],
     "chargerLevel": "DCFC",
@@ -11394,7 +12115,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -11560,6 +12281,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-145840",
+    "name": "Premium Outlet Collection EIA",
+    "lat": 53.303274,
+    "lng": -113.555407,
+    "address": "1 Outlet Collection Way Unit 1, Edmonton International Airport, AB",
+    "network": "Electrify Canada",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
     "id": "nrel-434108",
     "name": "PRESTIGE LEVEL 3 SOLAR",
     "lat": 51.153395,
@@ -11708,6 +12447,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-23324",
+    "name": "Ramada Plaza Calgary Airport",
+    "lat": 51.0829770461197,
+    "lng": -113.998260669603,
+    "address": "3515 26 Street NE, Calgary, Alberta",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 17.2,
+    "status": "operational"
+  },
+  {
     "id": "nrel-153409",
     "name": "Ranch Market - Tesla Supercharger",
     "lat": 51.038196,
@@ -11723,6 +12480,24 @@
     "level2Num": 0,
     "level1Num": 0,
     "maxPowerKw": 250,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-250625",
+    "name": "RCH SHOP PLUG",
+    "lat": 53.599286,
+    "lng": -113.416938,
+    "address": "13815 Manning Dr NW, Edmonton, AB",
+    "network": "Tesla",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -11812,7 +12587,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 16,
     "status": "operational"
   },
   {
@@ -11830,7 +12605,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -11848,7 +12623,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -11975,7 +12750,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -12029,8 +12804,26 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "temporarily_unavailable"
+  },
+  {
+    "id": "ocm-384770",
+    "name": "Ross Ulmer Cadillac  - Outside",
+    "lat": 53.2566933,
+    "lng": -110.0044436,
+    "address": "2101 50 Ave, Lloydminster, SK",
+    "network": "Electrify Canada",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
   },
   {
     "id": "nrel-83718",
@@ -12047,7 +12840,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -12321,7 +13114,26 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-234703",
+    "name": "Sherwood Park - DC",
+    "lat": 53.5366846430031,
+    "lng": -113.32615004351,
+    "address": "100 Chippewa Road, Sherwood Park, AB",
+    "network": "Electrify Canada",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "CHAdeMO",
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 2,
+    "level2Num": 0,
+    "level1Num": 0,
+    "maxPowerKw": 40,
     "status": "operational"
   },
   {
@@ -12339,6 +13151,26 @@
     ],
     "chargerLevel": "DCFC",
     "dcFastNum": 1,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 50,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-145849",
+    "name": "Simons - Londonderry",
+    "lat": 53.601725,
+    "lng": -113.444524,
+    "address": "100A 1-Londonderry Mall NW, Edmonton, AB",
+    "network": "Electrify Canada",
+    "connectorCount": 4,
+    "connectorTypes": [
+      "J1772",
+      "CHAdeMO",
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 2,
     "level2Num": 2,
     "level1Num": 0,
     "maxPowerKw": 50,
@@ -12377,7 +13209,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -12395,7 +13227,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -12467,7 +13299,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -12702,7 +13534,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -12720,7 +13552,7 @@
     "dcFastNum": 0,
     "level2Num": 3,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -12792,7 +13624,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -12829,7 +13661,7 @@
     "dcFastNum": 0,
     "level2Num": 3,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -12866,6 +13698,24 @@
     "level2Num": 0,
     "level1Num": 0,
     "maxPowerKw": 250,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-234657",
+    "name": "Southside Dodge Chrysler Jeep Ram",
+    "lat": 52.2458454065906,
+    "lng": -113.816194658291,
+    "address": "2804 50 Ave, Red Deer, AB",
+    "network": "Non-Networked",
+    "connectorCount": 1,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 1,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13046,7 +13896,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13065,6 +13915,24 @@
     "level2Num": 6,
     "level1Num": 0,
     "maxPowerKw": 6.2,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-23323",
+    "name": "Stadium Nissan",
+    "lat": 51.0718954986779,
+    "lng": -114.117222322333,
+    "address": "2420 Crowchild Trail NW, Calgary, Alberta",
+    "network": "Non-Networked",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": null,
     "status": "operational"
   },
   {
@@ -13118,7 +13986,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13136,7 +14004,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13192,6 +14060,24 @@
     "level2Num": 0,
     "level1Num": 0,
     "maxPowerKw": 100,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-234597",
+    "name": "Straight-Up Metal Buildings Ltd",
+    "lat": 50.9988746007639,
+    "lng": -113.879650309749,
+    "address": "98 Carmek Blvd, Rocky View County, AB",
+    "network": "Non-Networked",
+    "connectorCount": 7,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 7,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13343,6 +14229,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-109217",
+    "name": "Sunwapta Shopping Centre",
+    "lat": 53.54252062403796,
+    "lng": -113.64588557811214,
+    "address": "10175 186 St, Edmonton, Alberta",
+    "network": "FLO",
+    "connectorCount": 4,
+    "connectorTypes": [
+      "NACS"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 4,
+    "level1Num": 0,
+    "maxPowerKw": 16,
+    "status": "operational"
+  },
+  {
     "id": "nrel-116278",
     "name": "Sunwapta Shopping Centre - Tesla Destination",
     "lat": 53.542471,
@@ -13357,7 +14261,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13375,7 +14279,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13411,7 +14315,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13429,7 +14333,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13501,7 +14405,7 @@
     "dcFastNum": 0,
     "level2Num": 15,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13519,7 +14423,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13537,7 +14441,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13555,7 +14459,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13573,7 +14477,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13591,7 +14495,7 @@
     "dcFastNum": 0,
     "level2Num": 6,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13628,7 +14532,7 @@
     "dcFastNum": 0,
     "level2Num": 10,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13898,7 +14802,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13934,7 +14838,7 @@
     "dcFastNum": 0,
     "level2Num": 8,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13952,7 +14856,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -13970,7 +14874,7 @@
     "dcFastNum": 0,
     "level2Num": 4,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -14042,7 +14946,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -14280,6 +15184,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-234606",
+    "name": "TELUS PARK CALGARY",
+    "lat": 51.053666,
+    "lng": -113.990315,
+    "address": "2930 Centre Ave, Calgary, AB",
+    "network": "Tesla",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
     "id": "nrel-330016",
     "name": "TELUS SPARK TELUS SPARK 2",
     "lat": 51.054036,
@@ -14333,6 +15255,25 @@
     "level2Num": 0,
     "level1Num": 0,
     "maxPowerKw": 50,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-250622",
+    "name": "Tesla - 12512 - Edson AB",
+    "lat": 53.58673,
+    "lng": -116.42135,
+    "address": "4523 4 Ave, Edson, AB",
+    "network": "Electrify Canada",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "CHAdeMO",
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 2,
+    "level2Num": 0,
+    "level1Num": 0,
+    "maxPowerKw": 40,
     "status": "operational"
   },
   {
@@ -14406,7 +15347,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "temporarily_unavailable"
   },
   {
@@ -14516,7 +15457,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -14697,7 +15638,7 @@
     "dcFastNum": 0,
     "level2Num": 3,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -14733,7 +15674,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -14969,7 +15910,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -15171,6 +16112,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-23322",
+    "name": "University of Calgary - Lot 22",
+    "lat": 51.0813590650821,
+    "lng": -114.127980371735,
+    "address": "Campus Drive NW, Calgary, Alberta",
+    "network": "ChargePoint Network",
+    "connectorCount": 4,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 4,
+    "level1Num": 0,
+    "maxPowerKw": 6,
+    "status": "operational"
+  },
+  {
     "id": "nrel-250931",
     "name": "Upper Hotsprings - Banff National Park - Tesla Destination",
     "lat": 51.149211,
@@ -15240,7 +16199,7 @@
     "dcFastNum": 0,
     "level2Num": 3,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 13,
     "status": "operational"
   },
   {
@@ -15402,7 +16361,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
@@ -15492,7 +16451,43 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-384856",
+    "name": "West Edmonton Mall Public",
+    "lat": 53.524,
+    "lng": -113.62642,
+    "address": "8882 170 St NW, Edmonton, AB",
+    "network": "Non-Networked",
+    "connectorCount": 6,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 6,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
+    "id": "ocm-299714",
+    "name": "Western Chevrolet",
+    "lat": 51.45408591083802,
+    "lng": -112.700124318964,
+    "address": "910 AB-9, Drumheller, Alberta",
+    "network": "ChargePoint Network",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "CCS"
+    ],
+    "chargerLevel": "DCFC",
+    "dcFastNum": 2,
+    "level2Num": 0,
+    "level1Num": 0,
+    "maxPowerKw": 60,
     "status": "operational"
   },
   {
@@ -15691,7 +16686,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 16,
     "status": "operational"
   },
   {
@@ -15703,7 +16698,8 @@
     "network": "FLO",
     "connectorCount": 3,
     "connectorTypes": [
-      "J1772"
+      "CHAdeMO",
+      "CCS"
     ],
     "chargerLevel": "L2",
     "dcFastNum": 0,
@@ -15805,6 +16801,24 @@
     "status": "operational"
   },
   {
+    "id": "ocm-234679",
+    "name": "WRSD I'M FREEEEEEEEE",
+    "lat": 53.217068,
+    "lng": -114.971405,
+    "address": "4620 46 Ave, Drayton Valley, AB",
+    "network": "Tesla",
+    "connectorCount": 2,
+    "connectorTypes": [
+      "J1772"
+    ],
+    "chargerLevel": "L2",
+    "dcFastNum": 0,
+    "level2Num": 2,
+    "level1Num": 0,
+    "maxPowerKw": 3.7,
+    "status": "operational"
+  },
+  {
     "id": "nrel-232577",
     "name": "WVT WVT 1",
     "lat": 51.045727,
@@ -15856,7 +16870,7 @@
     "dcFastNum": 0,
     "level2Num": 2,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 13,
     "status": "operational"
   },
   {
@@ -16054,7 +17068,7 @@
     "dcFastNum": 0,
     "level2Num": 1,
     "level1Num": 0,
-    "maxPowerKw": null,
+    "maxPowerKw": 3.7,
     "status": "operational"
   },
   {
