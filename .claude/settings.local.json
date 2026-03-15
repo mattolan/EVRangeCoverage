@@ -9,7 +9,8 @@
       "Bash(powershell.exe:*)",
       "Bash(python3:*)",
       "Bash(python:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git:*)"
     ]
   }
 }

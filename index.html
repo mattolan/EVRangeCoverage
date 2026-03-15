@@ -74,85 +74,118 @@
     <aside id="sidebar">
       <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
 
-      <section class="sidebar-section">
-        <h2>Vehicle Range</h2>
-        <label for="range-input">Manufacturer rated range (km)</label>
-        <input type="number" id="range-input" min="50" max="1000" value="450" step="10" />
-      </section>
+      <button id="reset-btn" class="btn btn-secondary">Reset Defaults</button>
 
-      <section class="sidebar-section">
-        <h2>Highway Speed</h2>
-        <div class="slider-container">
-          <input type="range" id="speed-slider" min="90" max="140" value="120" step="5" />
-          <div class="slider-labels">
-            <span>90 km/h</span>
-            <span id="speed-value">120 km/h</span>
-            <span>140 km/h</span>
+      <div id="settings-panels">
+        <section class="sidebar-section collapsible" id="section-range">
+          <h2 class="section-header" data-section="section-range">Vehicle Range <span class="section-summary" id="summary-range"></span></h2>
+          <div class="section-body">
+            <label for="range-input">Manufacturer rated range (km)</label>
+            <input type="number" id="range-input" min="50" max="1000" value="450" step="10" />
           </div>
-        </div>
-        <div id="speed-factor" class="info-badge">Speed loss: —%</div>
-      </section>
+        </section>
 
-      <section class="sidebar-section">
-        <h2>Temperature</h2>
-        <div class="slider-container">
-          <input type="range" id="temp-slider" min="-40" max="35" value="0" step="1" />
-          <div class="slider-labels">
-            <span>-40°C</span>
-            <span id="temp-value">0°C</span>
-            <span>35°C</span>
+        <section class="sidebar-section collapsible" id="section-speed">
+          <h2 class="section-header" data-section="section-speed">Highway Speed <span class="section-summary" id="summary-speed"></span></h2>
+          <div class="section-body">
+            <div class="slider-container">
+              <input type="range" id="speed-slider" min="90" max="140" value="120" step="5" />
+              <div class="slider-labels">
+                <span>90 km/h</span>
+                <span id="speed-value">120 km/h</span>
+                <span>140 km/h</span>
+              </div>
+            </div>
+            <div id="speed-factor" class="info-badge">Speed loss: —%</div>
           </div>
-        </div>
-        <div id="temp-factor" class="info-badge">Range factor: 80%</div>
-      </section>
+        </section>
 
+        <section class="sidebar-section collapsible" id="section-temp">
+          <h2 class="section-header" data-section="section-temp">Temperature <span class="section-summary" id="summary-temp"></span></h2>
+          <div class="section-body">
+            <div class="slider-container">
+              <input type="range" id="temp-slider" min="-40" max="35" value="0" step="1" />
+              <div class="slider-labels">
+                <span>-40°C</span>
+                <span id="temp-value">0°C</span>
+                <span>35°C</span>
+              </div>
+            </div>
+            <div id="temp-factor" class="info-badge">Range factor: 80%</div>
+          </div>
+        </section>
+
+        <section class="sidebar-section collapsible" id="section-battery">
+          <h2 class="section-header" data-section="section-battery">Battery <span class="section-summary" id="summary-battery"></span></h2>
+          <div class="section-body">
+            <label for="soc-slider" class="slider-label-inline">Start charge <span id="soc-value">80%</span></label>
+            <input type="range" id="soc-slider" min="50" max="100" value="80" step="5" />
+            <label for="reserve-slider" class="slider-label-inline">Reserve <span id="reserve-value">20%</span></label>
+            <input type="range" id="reserve-slider" min="0" max="40" value="20" step="5" />
+            <div id="reserve-info" class="info-badge">Usable battery: 60%</div>
+          </div>
+        </section>
+
+        <section class="sidebar-section collapsible" id="section-options">
+          <h2 class="section-header" data-section="section-options">Options <span class="section-summary" id="summary-options"></span></h2>
+          <div class="section-body">
+            <div class="radio-group">
+              <label>
+                <input type="radio" name="range-mode" value="roundtrip" checked />
+                Round-trip safe
+              </label>
+              <label>
+                <input type="radio" name="range-mode" value="oneway" />
+                One-way range
+              </label>
+            </div>
+            <hr class="section-divider" />
+            <label class="checkbox-label">
+              <input type="checkbox" id="safe-route-toggle" />
+              Safe Route (hide single-charger)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="show-l2-toggle" />
+              Show Level 2 stations
+            </label>
+            <hr class="section-divider" />
+            <label for="opacity-slider" class="slider-label-inline">Overlay opacity <span id="opacity-value">40%</span></label>
+            <input type="range" id="opacity-slider" min="5" max="50" value="40" step="1" />
+          </div>
+        </section>
+      </div>
 
       <section class="sidebar-section">
-        <h2>Battery</h2>
-        <label for="soc-slider" class="slider-label-inline">Start charge <span id="soc-value">80%</span></label>
-        <input type="range" id="soc-slider" min="50" max="100" value="80" step="5" />
-        <label for="reserve-slider" class="slider-label-inline">Reserve <span id="reserve-value">20%</span></label>
-        <input type="range" id="reserve-slider" min="0" max="40" value="20" step="5" />
-        <div id="reserve-info" class="info-badge">Usable battery: 60%</div>
-      </section>
-
-      <section class="sidebar-section">
-        <h2>Options</h2>
-        <div class="radio-group">
-          <label>
-            <input type="radio" name="range-mode" value="roundtrip" checked />
-            Round-trip safe
-          </label>
-          <label>
-            <input type="radio" name="range-mode" value="oneway" />
-            One-way range
-          </label>
-        </div>
-        <hr class="section-divider" />
+        <h2>Route Planner</h2>
+        <div class="route-disclaimer">Drive times shown do not include charging stops.</div>
+        <label for="charge-to-slider" class="slider-label-inline">Charge to at stops <span id="charge-to-value">80%</span></label>
+        <input type="range" id="charge-to-slider" min="50" max="100" value="80" step="5" />
         <label class="checkbox-label">
-          <input type="checkbox" id="safe-route-toggle" />
-          Safe Route (hide single-charger)
+          <input type="checkbox" id="prefer-major-toggle" checked />
+          Prefer major stations
         </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="show-l2-toggle" />
-          Show Level 2 stations
-        </label>
-        <hr class="section-divider" />
-        <label for="opacity-slider" class="slider-label-inline">Overlay opacity <span id="opacity-value">40%</span></label>
-        <input type="range" id="opacity-slider" min="5" max="50" value="40" step="1" />
+        <button id="route-toggle" class="btn">Plan a Route</button>
+        <button id="route-clear" class="btn btn-secondary hidden">Clear Route</button>
+        <div id="route-instructions" class="info-badge hidden">Click the map to set your start point</div>
+        <div id="route-result" class="hidden"></div>
       </section>
 
     </aside>
 
     <div id="map-wrapper">
       <div id="map"></div>
-      <div id="range-overlay">
+      <div id="range-overlay" title="">
         <div id="range-display" class="range-value">— km</div>
         <div class="range-label">effective range</div>
+        <div id="range-breakdown" class="range-breakdown hidden"></div>
       </div>
       <div id="coverage-overlay">
         <div id="coverage-display" class="coverage-value">—%</div>
         <div id="coverage-label" class="coverage-label">of Alberta covered</div>
+      </div>
+      <div id="route-calc-indicator" class="hidden">
+        <div class="route-calc-ring"></div>
+        <span>Calculating route...</span>
       </div>
       <div id="legend-overlay">
         <div class="legend-item" title="3 or more DC fast chargers available — low risk of waiting or being stranded"><span class="legend-dot green"></span> 3+ chargers</div>

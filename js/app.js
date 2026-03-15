@@ -883,10 +883,13 @@
     // Step 2: Find the chain of chargers along the corridor
     var chain = findChargerChain(routeStart, routeEnd, corridorStations, maxFirstLegKm, maxLegKm, corridorGeometry);
 
-    // Step 2b: If corridor route fails, retry with ALL stations (alternate roads may work)
+    // Step 2b: If corridor route fails, retry with ALL stations using haversine fallback
+    // The OSRM route may follow a road with no chargers (e.g. Hwy 16 via Jasper),
+    // while a longer alternate route (Hwy 43/2 via Edmonton) has charger coverage.
+    // Haversine-based routing isn't tied to the OSRM corridor so it can find these alternates.
     if (!chain.feasible && corridorStations.length < stations.length) {
-      console.log('[Route] Corridor route failed, retrying with all ' + stations.length + ' stations');
-      chain = findChargerChain(routeStart, routeEnd, stations, maxFirstLegKm, maxLegKm, corridorGeometry);
+      console.log('[Route] Corridor route failed, retrying with all ' + stations.length + ' stations (haversine fallback)');
+      chain = findChargerChainHaversine(routeStart, routeEnd, stations, maxFirstLegKm, maxLegKm);
     }
 
     // Step 3: Build waypoints and fetch OSRM routes
@@ -1125,9 +1128,9 @@
     return { points: points, totalDist: cumDist };
   }
 
-  // Get how far along the route a point is (0 = start, 1 = end)
+  // Get how far along the route a point is (0 = start, 1 = end) and how far off-route it is
   function getRouteProgress(routeData, lat, lng) {
-    if (!routeData) return null;
+    if (!routeData) return { progress: 0, offRouteKm: Infinity };
     var bestDist = Infinity;
     var bestCum = 0;
     for (var i = 0; i < routeData.points.length; i++) {
@@ -1138,7 +1141,10 @@
         bestCum = p.cumDist;
       }
     }
-    return routeData.totalDist > 0 ? bestCum / routeData.totalDist : 0;
+    return {
+      progress: routeData.totalDist > 0 ? bestCum / routeData.totalDist : 0,
+      offRouteKm: bestDist,
+    };
   }
 
   // ============================================================
@@ -1151,15 +1157,182 @@
     return findChargerChainGreedy(start, end, stations, maxFirstLegKm, maxLegKm, routeGeometry);
   }
 
-  // Original greedy: best progress along route (falls back to nearest-to-destination if no route data)
+  // Pre-compute route-km position and off-route distance for each station
+  function buildStationRouteIndex(stations, routeData) {
+    var indexed = [];
+    for (var s = 0; s < stations.length; s++) {
+      var rp = getRouteProgress(routeData, stations[s].lat, stations[s].lng);
+      indexed.push({
+        station: stations[s],
+        routeKm: rp.progress * routeData.totalDist,
+        offRouteKm: rp.offRouteKm,
+        quality: getStationQuality(stations[s]),
+      });
+    }
+    // Filter out stations far from the route and sort by route-km
+    indexed = indexed.filter(function (s) { return s.offRouteKm < 50; });
+    indexed.sort(function (a, b) { return a.routeKm - b.routeKm; });
+    return indexed;
+  }
+
+  // Segment-based chain builder: walk the route in leg-sized chunks
+  // pickerFn(candidates, reachable) selects the best station from candidates
+  function buildChainSegmented(start, end, stationIndex, maxFirstLegKm, maxLegKm, routeData, pickerFn) {
+    var ROAD_FACTOR = 1.3;
+    var chain = [];
+    var visited = {};
+    var current = { lat: start.lat, lng: start.lng };
+    var isFirstLeg = true;
+    var maxIterations = 50;
+
+    var startRp = getRouteProgress(routeData, start.lat, start.lng);
+    var endRp = getRouteProgress(routeData, end.lat, end.lng);
+    var currentKm = startRp.progress * routeData.totalDist;
+    var endKm = endRp.progress * routeData.totalDist;
+
+    for (var i = 0; i < maxIterations; i++) {
+      var thisLegMax = isFirstLeg ? maxFirstLegKm : maxLegKm;
+      var maxHaversine = thisLegMax / ROAD_FACTOR;
+
+      // Can we reach the destination directly?
+      var remainingKm = endKm - currentKm;
+      var distToEnd = haversineKm(current.lat, current.lng, end.lat, end.lng);
+      if (remainingKm <= thisLegMax && distToEnd <= maxHaversine) {
+        chain.push({ type: 'destination', dist: distToEnd });
+        return { feasible: true, chain: chain };
+      }
+
+      // Find stations ahead of us within this leg's range
+      var reachable = [];
+      for (var s = 0; s < stationIndex.length; s++) {
+        var si = stationIndex[s];
+        if (visited[si.station.id]) continue;
+
+        var routeDist = si.routeKm - currentKm;
+        if (routeDist < 5) continue;           // behind us or too close
+        if (routeDist > thisLegMax) continue;   // too far along the road
+
+        // Sanity check: haversine reachability
+        var hvDist = haversineKm(current.lat, current.lng, si.station.lat, si.station.lng);
+        if (hvDist > maxHaversine) continue;
+
+        reachable.push({
+          station: si.station,
+          distFromCurrent: hvDist,
+          routeKm: si.routeKm,
+          routeDist: routeDist,
+          offRouteKm: si.offRouteKm,
+          quality: si.quality,
+        });
+      }
+
+      if (reachable.length === 0) {
+        chain.push({ type: 'gap', from: current, distToEnd: distToEnd, maxRange: thisLegMax });
+        return { feasible: false, chain: chain };
+      }
+
+      // Sort by distance along route (furthest first)
+      reachable.sort(function (a, b) { return b.routeDist - a.routeDist; });
+
+      // Candidates: stations in the top 50% of reachable route distance
+      // So on a 200km leg, we consider stations from 100km–200km ahead
+      var maxReachDist = reachable[0].routeDist;
+      var minCandidateDist = maxReachDist * 0.5;
+      var candidates = reachable.filter(function (r) {
+        return r.routeDist >= minCandidateDist;
+      });
+      if (candidates.length === 0) candidates = [reachable[0]];
+
+      // Let the picker choose (greedy vs smart)
+      var best = pickerFn(candidates, reachable);
+
+      visited[best.station.id] = true;
+      isFirstLeg = false;
+      currentKm = best.routeKm;
+      current = { lat: best.station.lat, lng: best.station.lng };
+
+      chain.push({
+        type: 'charger',
+        station: best.station,
+        dist: best.distFromCurrent,
+        risk: getRiskLevel(best.station),
+      });
+    }
+    return { feasible: false, chain: chain };
+  }
+
+  // Greedy: pick the station furthest along the route (max progress per leg)
   function findChargerChainGreedy(start, end, stations, maxFirstLegKm, maxLegKm, routeGeometry) {
     var ROAD_FACTOR = 1.3;
+    var routeData = buildRouteProgress(routeGeometry);
+
+    // Fallback: no route data, use old haversine-to-destination approach
+    if (!routeData) {
+      return findChargerChainHaversine(start, end, stations, maxFirstLegKm, maxLegKm);
+    }
+
+    var stationIndex = buildStationRouteIndex(stations, routeData);
+
+    return buildChainSegmented(start, end, stationIndex, maxFirstLegKm, maxLegKm, routeData,
+      function greedyPicker(candidates) {
+        // Just pick the furthest along (already sorted desc by routeDist in candidates)
+        return candidates[0];
+      }
+    );
+  }
+
+  // Smart: prefer high-quality stations, willing to stop sooner for a better station
+  function findChargerChainSmart(start, end, stations, maxFirstLegKm, maxLegKm, routeGeometry) {
+    var ROAD_FACTOR = 1.3;
+    var routeData = buildRouteProgress(routeGeometry);
+
+    if (!routeData) {
+      return findChargerChainHaversine(start, end, stations, maxFirstLegKm, maxLegKm);
+    }
+
+    var stationIndex = buildStationRouteIndex(stations, routeData);
+
+    return buildChainSegmented(start, end, stationIndex, maxFirstLegKm, maxLegKm, routeData,
+      function smartPicker(candidates, reachable) {
+        // Among candidates in the top 50%, pick highest quality (penalize off-route)
+        candidates.sort(function (a, b) {
+          var aQual = a.quality - Math.max(0, a.offRouteKm - 15) * 0.5;
+          var bQual = b.quality - Math.max(0, b.offRouteKm - 15) * 0.5;
+          var qualDiff = bQual - aQual;
+          if (Math.abs(qualDiff) > 10) return qualDiff; // quality wins
+          return b.routeDist - a.routeDist;              // tiebreak: further along
+        });
+
+        var best = candidates[0];
+
+        // Early-stop: if the best candidate is low quality, look for a good station
+        // sooner along the route (willing to add an extra stop for reliability)
+        if (best.quality < 15) {
+          var maxReachDist = reachable[0].routeDist;
+          var earlyGood = reachable.filter(function (r) {
+            return r.routeDist <= maxReachDist * 0.6 && r.quality >= 30 && r.offRouteKm < 30;
+          });
+          if (earlyGood.length > 0) {
+            earlyGood.sort(function (a, b) { return b.quality - a.quality; });
+            best = earlyGood[0];
+          }
+        }
+
+        return best;
+      }
+    );
+  }
+
+  // Haversine fallback when OSRM corridor has no charger coverage
+  // Uses straight-line distance to destination — works for finding alternate corridors
+  function findChargerChainHaversine(start, end, stations, maxFirstLegKm, maxLegKm) {
+    var ROAD_FACTOR = 1.3;
+    var DETOUR_TOLERANCE = 30;
     var chain = [];
     var visited = {};
     var current = { lat: start.lat, lng: start.lng };
     var maxIterations = 50;
     var isFirstLeg = true;
-    var routeData = buildRouteProgress(routeGeometry);
 
     for (var i = 0; i < maxIterations; i++) {
       var thisLegMax = isFirstLeg ? maxFirstLegKm : maxLegKm;
@@ -1181,7 +1354,7 @@
             station: st,
             distFromCurrent: distToStation,
             distToEnd: haversineKm(st.lat, st.lng, end.lat, end.lng),
-            routeProgress: routeData ? getRouteProgress(routeData, st.lat, st.lng) : null,
+            quality: preferMajorStations ? getStationQuality(st) : 0,
           });
         }
       }
@@ -1191,134 +1364,37 @@
         return { feasible: false, chain: chain };
       }
 
-      // Sort by route progress (furthest along route first), fall back to nearest-to-destination
-      if (routeData) {
-        reachable.sort(function (a, b) { return b.routeProgress - a.routeProgress; });
-      } else {
-        reachable.sort(function (a, b) { return a.distToEnd - b.distToEnd; });
-      }
-      var best = reachable[0];
-      visited[best.station.id] = true;
-      isFirstLeg = false;
-
-      chain.push({
-        type: 'charger',
-        station: best.station,
-        dist: best.distFromCurrent,
-        risk: getRiskLevel(best.station),
-      });
-      current = { lat: best.station.lat, lng: best.station.lng };
-    }
-    return { feasible: false, chain: chain };
-  }
-
-  // Smart routing: prefer high-quality stations along the road route, willing to stop sooner or add stops
-  function findChargerChainSmart(start, end, stations, maxFirstLegKm, maxLegKm, routeGeometry) {
-    var ROAD_FACTOR = 1.3;
-    var DETOUR_TOLERANCE = 30; // km further from destination we'll accept for quality
-    var chain = [];
-    var visited = {};
-    var current = { lat: start.lat, lng: start.lng };
-    var maxIterations = 50;
-    var isFirstLeg = true;
-    var routeData = buildRouteProgress(routeGeometry);
-    var currentProgress = routeData ? getRouteProgress(routeData, start.lat, start.lng) : 0;
-
-    for (var i = 0; i < maxIterations; i++) {
-      var thisLegMax = isFirstLeg ? maxFirstLegKm : maxLegKm;
-      var maxHaversine = thisLegMax / ROAD_FACTOR;
-      var distToEnd = haversineKm(current.lat, current.lng, end.lat, end.lng);
-
-      if (distToEnd <= maxHaversine) {
-        chain.push({ type: 'destination', dist: distToEnd });
-        return { feasible: true, chain: chain };
-      }
-
-      // Gather all reachable chargers
-      var reachable = [];
-      for (var s = 0; s < stations.length; s++) {
-        var st = stations[s];
-        if (visited[st.id]) continue;
-        var distToStation = haversineKm(current.lat, current.lng, st.lat, st.lng);
-        if (distToStation <= maxHaversine && distToStation > 1) {
-          var distStationToEnd = haversineKm(st.lat, st.lng, end.lat, end.lng);
-          var progress = routeData ? getRouteProgress(routeData, st.lat, st.lng) : null;
-          reachable.push({
-            station: st,
-            distFromCurrent: distToStation,
-            distToEnd: distStationToEnd,
-            quality: getStationQuality(st),
-            routeProgress: progress,
-          });
-        }
-      }
-
-      if (reachable.length === 0) {
-        chain.push({ type: 'gap', from: current, distToEnd: distToEnd, maxRange: thisLegMax });
-        return { feasible: false, chain: chain };
-      }
-
-      // Sort by route progress (best forward progress along road), fall back to nearest-to-destination
-      if (routeData) {
-        // Only consider stations that make forward progress along the route
-        var forward = reachable.filter(function (r) {
-          return r.routeProgress > currentProgress - 0.02; // small tolerance for nearby stations
-        });
-        if (forward.length > 0) reachable = forward;
-
-        reachable.sort(function (a, b) { return b.routeProgress - a.routeProgress; });
-      } else {
-        reachable.sort(function (a, b) { return a.distToEnd - b.distToEnd; });
-      }
-
+      // Sort by closest to destination
+      reachable.sort(function (a, b) { return a.distToEnd - b.distToEnd; });
       var nearest = reachable[0];
-      var baselineProgress = nearest.routeProgress;
-      var baselineDist = nearest.distToEnd;
+      var best = nearest;
 
-      // Consider all stations within detour tolerance
-      var candidates;
-      if (routeData && baselineProgress !== null) {
-        // Tolerance: stations within ~30km equivalent of route progress
-        var progressTolerance = routeData.totalDist > 0 ? DETOUR_TOLERANCE / routeData.totalDist : 0.05;
-        candidates = reachable.filter(function (r) {
-          return r.routeProgress >= baselineProgress - progressTolerance;
+      // If preferring major stations, consider quality among nearby candidates
+      if (preferMajorStations) {
+        var candidates = reachable.filter(function (r) {
+          return r.distToEnd <= nearest.distToEnd + DETOUR_TOLERANCE;
         });
-      } else {
-        candidates = reachable.filter(function (r) {
-          return r.distToEnd <= baselineDist + DETOUR_TOLERANCE;
+        candidates.sort(function (a, b) {
+          var qualDiff = b.quality - a.quality;
+          if (Math.abs(qualDiff) > 10) return qualDiff;
+          return a.distToEnd - b.distToEnd;
         });
-      }
-      if (candidates.length === 0) candidates = [nearest];
+        best = candidates[0];
 
-      // Among candidates, pick the highest quality
-      // If qualities are close (within 10 points), prefer further along route
-      candidates.sort(function (a, b) {
-        var qualDiff = b.quality - a.quality;
-        if (Math.abs(qualDiff) > 10) return qualDiff; // quality wins
-        if (routeData) return b.routeProgress - a.routeProgress; // tiebreak: further along route
-        return a.distToEnd - b.distToEnd; // tiebreak: closer to destination
-      });
-
-      var best = candidates[0];
-
-      // Extra check: if the best pick is low quality (< 15), see if we can stop
-      // sooner at a high-quality station instead (willing to add an extra stop)
-      if (best.quality < 15) {
-        // Look for a good station in the first 60% of our range
-        var earlyRange = maxHaversine * 0.6;
-        var earlyGood = reachable.filter(function (r) {
-          return r.distFromCurrent <= earlyRange && r.quality >= 30;
-        });
-        if (earlyGood.length > 0) {
-          // Pick the best quality early stop
-          earlyGood.sort(function (a, b) { return b.quality - a.quality; });
-          best = earlyGood[0];
+        // Early-stop: prefer a good station sooner over a bad one further
+        if (best.quality < 15) {
+          var earlyGood = reachable.filter(function (r) {
+            return r.distFromCurrent <= maxHaversine * 0.6 && r.quality >= 30;
+          });
+          if (earlyGood.length > 0) {
+            earlyGood.sort(function (a, b) { return b.quality - a.quality; });
+            best = earlyGood[0];
+          }
         }
       }
 
       visited[best.station.id] = true;
       isFirstLeg = false;
-      if (routeData) currentProgress = best.routeProgress;
 
       chain.push({
         type: 'charger',
