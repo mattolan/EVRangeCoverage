@@ -297,6 +297,9 @@
     if (risk === 'red') {
       warning = '<div class="popup-warning">⚠ Single charger — have a backup plan</div>';
     }
+    if (station.network === 'Tesla' && (!station.maxPowerKw || station.maxPowerKw < 200)) {
+      warning += '<div class="popup-warning">⚠ Possible Access Restrictions: Check the Tesla app for third-party access</div>';
+    }
 
     var statusLabel = station.status.replace('_', ' ');
     statusLabel = statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1);
@@ -312,6 +315,11 @@
       portDetails += station.level2Num + ' L2';
     }
 
+    var powerLine = '';
+    if (station.maxPowerKw) {
+      powerLine = '<strong>Max Power:</strong> ' + station.maxPowerKw + ' kW<br>';
+    }
+
     return '<div class="popup-station">' +
       '<h3>' + station.name + '</h3>' +
       '<div class="popup-detail">' +
@@ -319,6 +327,7 @@
         '<strong>Network:</strong> ' + station.network + '<br>' +
         '<strong>Level:</strong> ' + station.chargerLevel + '<br>' +
         '<strong>Ports:</strong> ' + portDetails + '<br>' +
+        powerLine +
         '<strong>Connectors:</strong> ' + connectorInfo + '<br>' +
         '<strong>Status:</strong> ' + statusLabel +
       '</div>' +
@@ -432,6 +441,7 @@
   // ============================================================
   var currentTemp = 0;
   var currentSpeed = 120;
+  var batteryKwh = 85;     // Battery capacity in kWh
   var startingSoc = 0.80;
   var batteryReserve = 0.20;
   var chargeToSoc = 0.80;  // SOC to charge to at public stations
@@ -541,6 +551,12 @@
     });
 
     // Starting charge slider
+    document.getElementById('battery-kwh-slider').addEventListener('input', function (e) {
+      batteryKwh = parseInt(e.target.value);
+      document.getElementById('battery-kwh-value').textContent = batteryKwh + ' kWh';
+      refresh();
+    });
+
     document.getElementById('soc-slider').addEventListener('input', function (e) {
       startingSoc = parseInt(e.target.value) / 100;
       document.getElementById('soc-value').textContent = e.target.value + '%';
@@ -693,7 +709,7 @@
     document.getElementById('summary-speed').textContent = currentSpeed + ' km/h';
     document.getElementById('summary-temp').textContent = currentTemp + '°C';
     document.getElementById('summary-battery').textContent =
-      Math.round(startingSoc * 100) + '% → ' + Math.round(batteryReserve * 100) + '% reserve';
+      batteryKwh + ' kWh · ' + Math.round(startingSoc * 100) + '% → ' + Math.round(batteryReserve * 100) + '% reserve';
     var opts = [];
     if (rangeMode === 'roundtrip') opts.push('Round-trip');
     else opts.push('One-way');
@@ -1431,7 +1447,29 @@
     return mins + ' min';
   }
 
-  function formatChargerDetails(station, risk) {
+  // Estimate charging time in minutes given arrival/departure SOC and charger power
+  function estimateChargeTimeMin(arrivalSoc, departureSoc, chargerPowerKw) {
+    if (!chargerPowerKw || chargerPowerKw <= 0) return null;
+    var energyNeeded = batteryKwh * (departureSoc - arrivalSoc);
+    if (energyNeeded <= 0) return 0;
+    // Simple model: average ~85% efficiency for DC fast, ~90% for L2
+    var efficiency = chargerPowerKw >= 50 ? 0.85 : 0.90;
+    var hours = energyNeeded / (chargerPowerKw * efficiency);
+    return Math.round(hours * 60);
+  }
+
+  function formatChargeTime(minutes) {
+    if (minutes === null) return '';
+    if (minutes < 1) return '< 1 min charge';
+    if (minutes >= 60) {
+      var h = Math.floor(minutes / 60);
+      var m = minutes % 60;
+      return h + 'h ' + m + 'm charge';
+    }
+    return minutes + ' min charge';
+  }
+
+  function formatChargerDetails(station, risk, arrivalSoc, departureSoc) {
     var riskLabels = { green: 'Low risk', yellow: 'Moderate risk', red: 'High risk', blue: 'Level 2' };
     var html = '<div class="route-stop-details">';
     html += '<div class="route-detail-line">' + station.network + '</div>';
@@ -1442,7 +1480,6 @@
       html += station.level2Num + ' Level 2';
     }
     if (station.connectorTypes && station.connectorTypes.length > 0) {
-      // Filter out J1772 unless L2 stations are shown
       var types = station.connectorTypes.filter(function (t) {
         return showL2 || t !== 'J1772';
       });
@@ -1451,7 +1488,18 @@
       }
     }
     html += '</div>';
+    if (station.maxPowerKw) {
+      html += '<div class="route-detail-line">' + station.maxPowerKw + ' kW';
+      var chargeMin = estimateChargeTimeMin(arrivalSoc, departureSoc, station.maxPowerKw);
+      if (chargeMin !== null && chargeMin > 0) {
+        html += ' · ' + formatChargeTime(chargeMin);
+      }
+      html += '</div>';
+    }
     html += '<div class="route-detail-line route-detail-risk" style="color:' + RISK_COLORS[risk].fillColor + '">' + riskLabels[risk] + '</div>';
+    if (station.network === 'Tesla' && (!station.maxPowerKw || station.maxPowerKw < 200)) {
+      html += '<div class="route-detail-line" style="color:#e67e22;font-size:0.7rem;">Possible Access Restrictions: Check the Tesla app for third-party access</div>';
+    }
     html += '</div>';
     return html;
   }
@@ -1483,18 +1531,14 @@
     var currentSoc = startingSoc;
 
     if (result.feasible) {
-      // Total distance and duration from OSRM if available
-      if (hasRoadRoute) {
-        var totalKm = Math.round(osrmResult.totalDistM / 1000);
-        var totalTime = formatDuration(osrmResult.totalDurS);
-        html += '<div class="route-feasible">Route is feasible!</div>';
-        html += '<div style="color:#999;font-size:0.8rem;">' + totalKm + ' km · ' + totalTime + ' drive</div>';
-      } else {
-        html += '<div class="route-feasible">Route is feasible!</div>';
-      }
+      html += '<div class="route-feasible">Route is feasible!</div>';
 
-      html += '<div class="route-stop"><span class="stop-num" style="background:var(--color-green)">A</span> Start</div>';
-      html += '<div class="route-soc">Depart: ' + Math.round(currentSoc * 100) + '%</div>';
+      // Build stops HTML first to calculate total charge time, then prepend summary
+      var stopsHtml = '';
+      var totalChargeMin = 0;
+
+      stopsHtml += '<div class="route-stop"><span class="stop-num" style="background:var(--color-green)">A</span> Start</div>';
+      stopsHtml += '<div class="route-soc">Depart: ' + Math.round(currentSoc * 100) + '%</div>';
 
       for (var i = 0; i < result.chain.length; i++) {
         var c = result.chain[i];
@@ -1512,15 +1556,19 @@
           var socUsed = legDist / fullRange;
           var arrivalSoc = currentSoc - socUsed;
           var arrivalPct = Math.max(0, Math.round(arrivalSoc * 100));
+          var prevSoc = Math.max(0, arrivalSoc);
           currentSoc = chargeToSoc;
 
-          html += '<div class="route-leg">↓ ' + legDist + ' km' + (legTime ? ' · ' + legTime : '') + '</div>';
-          html += '<div class="route-stop"><span class="stop-num" style="background:' + riskColor + '">' + stopNum + '</span> ' + c.station.name + '</div>';
-          html += formatChargerDetails(c.station, c.risk);
-          html += '<div class="route-soc">';
-          html += '<span class="' + (arrivalPct <= Math.round(batteryReserve * 100) ? 'soc-warning' : '') + '">Arrive: ' + arrivalPct + '%</span>';
-          html += ' → Depart: ' + Math.round(currentSoc * 100) + '%';
-          html += '</div>';
+          var stopChargeMin = estimateChargeTimeMin(prevSoc, chargeToSoc, c.station.maxPowerKw);
+          if (stopChargeMin) totalChargeMin += stopChargeMin;
+
+          stopsHtml += '<div class="route-leg">↓ ' + legDist + ' km' + (legTime ? ' · ' + legTime : '') + '</div>';
+          stopsHtml += '<div class="route-stop"><span class="stop-num" style="background:' + riskColor + '">' + stopNum + '</span> ' + c.station.name + '</div>';
+          stopsHtml += formatChargerDetails(c.station, c.risk, prevSoc, chargeToSoc);
+          stopsHtml += '<div class="route-soc">';
+          stopsHtml += '<span class="' + (arrivalPct <= Math.round(batteryReserve * 100) ? 'soc-warning' : '') + '">Arrive: ' + arrivalPct + '%</span>';
+          stopsHtml += ' → Depart: ' + Math.round(currentSoc * 100) + '%';
+          stopsHtml += '</div>';
 
           var stopMarker = L.marker([c.station.lat, c.station.lng], {
             icon: L.divIcon({
@@ -1544,11 +1592,24 @@
           var arrivalSoc = currentSoc - socUsed;
           var arrivalPct = Math.max(0, Math.round(arrivalSoc * 100));
 
-          html += '<div class="route-leg">↓ ' + legDist + ' km' + (legTime ? ' · ' + legTime : '') + '</div>';
-          html += '<div class="route-stop"><span class="stop-num" style="background:var(--color-btn)">B</span> Destination</div>';
-          html += '<div class="route-soc"><span class="' + (arrivalPct <= Math.round(batteryReserve * 100) ? 'soc-warning' : '') + '">Arrive: ' + arrivalPct + '%</span></div>';
+          stopsHtml += '<div class="route-leg">↓ ' + legDist + ' km' + (legTime ? ' · ' + legTime : '') + '</div>';
+          stopsHtml += '<div class="route-stop"><span class="stop-num" style="background:var(--color-btn)">B</span> Destination</div>';
+          stopsHtml += '<div class="route-soc"><span class="' + (arrivalPct <= Math.round(batteryReserve * 100) ? 'soc-warning' : '') + '">Arrive: ' + arrivalPct + '%</span></div>';
         }
       }
+
+      // Summary line with distance, drive time, and charge time
+      if (hasRoadRoute) {
+        var totalKm = Math.round(osrmResult.totalDistM / 1000);
+        var driveTime = formatDuration(osrmResult.totalDurS);
+        var summary = totalKm + ' km · ' + driveTime + ' drive';
+        if (totalChargeMin > 0) {
+          summary += ' + ~' + formatChargeTime(totalChargeMin);
+        }
+        html += '<div style="color:#999;font-size:0.8rem;">' + summary + '</div>';
+      }
+
+      html += stopsHtml;
 
       if (stopNum === 0) {
         html += '<div style="color:#999;font-size:0.8rem;margin-top:0.3rem;">Direct — no charging stops needed</div>';
@@ -1596,11 +1657,12 @@
           var socUsed = legDist / fullRange;
           var arrivalSoc = currentSoc - socUsed;
           var arrivalPct = Math.max(0, Math.round(arrivalSoc * 100));
+          var prevSoc = arrivalSoc;
           currentSoc = chargeToSoc;
 
           html += '<div class="route-leg route-leg-ok">↓ ' + legDist + ' km' + (legTime ? ' · ' + legTime : '') + '</div>';
           html += '<div class="route-stop"><span class="stop-num" style="background:' + riskColor + '">' + stopNum + '</span> ' + c.station.name + '</div>';
-          html += formatChargerDetails(c.station, c.risk);
+          html += formatChargerDetails(c.station, c.risk, Math.max(0, prevSoc), chargeToSoc);
           html += '<div class="route-soc">';
           html += '<span class="' + (arrivalPct <= Math.round(batteryReserve * 100) ? 'soc-warning' : '') + '">Arrive: ' + arrivalPct + '%</span>';
           html += ' → Depart: ' + Math.round(currentSoc * 100) + '%';
@@ -1666,7 +1728,7 @@
   // DEFAULTS, RESET & URL STATE
   // ============================================================
   var DEFAULTS = {
-    range: 450, speed: 120, temp: 0, soc: 80, reserve: 20, chargeTo: 80, preferMajor: true,
+    range: 450, speed: 120, temp: 0, soc: 80, reserve: 20, chargeTo: 80, batteryKwh: 85, preferMajor: true,
     mode: 'roundtrip', safe: false, l2: false, opacity: 40
   };
 
@@ -1674,6 +1736,7 @@
     baseRangeKm = s.range;
     currentSpeed = s.speed;
     currentTemp = s.temp;
+    batteryKwh = s.batteryKwh;
     startingSoc = s.soc / 100;
     batteryReserve = s.reserve / 100;
     chargeToSoc = s.chargeTo / 100;
@@ -1687,6 +1750,7 @@
     document.getElementById('range-input').value = s.range;
     document.getElementById('speed-slider').value = s.speed;
     document.getElementById('temp-slider').value = s.temp;
+    document.getElementById('battery-kwh-slider').value = s.batteryKwh;
     document.getElementById('soc-slider').value = s.soc;
     document.getElementById('reserve-slider').value = s.reserve;
     document.getElementById('charge-to-slider').value = s.chargeTo;
@@ -1695,6 +1759,7 @@
     document.querySelector('input[name="range-mode"][value="' + s.mode + '"]').checked = true;
     document.getElementById('safe-route-toggle').checked = s.safe;
     document.getElementById('show-l2-toggle').checked = s.l2;
+    document.getElementById('battery-kwh-value').textContent = s.batteryKwh + ' kWh';
     document.getElementById('soc-value').textContent = s.soc + '%';
     document.getElementById('reserve-value').textContent = s.reserve + '%';
     document.getElementById('charge-to-value').textContent = s.chargeTo + '%';
@@ -1719,6 +1784,7 @@
     if (Math.round(startingSoc * 100) !== DEFAULTS.soc) p.set('soc', Math.round(startingSoc * 100));
     if (Math.round(batteryReserve * 100) !== DEFAULTS.reserve) p.set('reserve', Math.round(batteryReserve * 100));
     if (Math.round(chargeToSoc * 100) !== DEFAULTS.chargeTo) p.set('chargeTo', Math.round(chargeToSoc * 100));
+    if (batteryKwh !== DEFAULTS.batteryKwh) p.set('batteryKwh', batteryKwh);
     if (preferMajorStations !== DEFAULTS.preferMajor) p.set('preferMajor', '0');
     if (rangeMode !== DEFAULTS.mode) p.set('mode', rangeMode);
     if (safeRoute !== DEFAULTS.safe) p.set('safe', '1');
@@ -1738,6 +1804,7 @@
       soc: parseInt(p.get('soc')) || DEFAULTS.soc,
       reserve: p.has('reserve') ? parseInt(p.get('reserve')) : DEFAULTS.reserve,
       chargeTo: parseInt(p.get('chargeTo')) || DEFAULTS.chargeTo,
+      batteryKwh: parseInt(p.get('batteryKwh')) || DEFAULTS.batteryKwh,
       preferMajor: p.has('preferMajor') ? p.get('preferMajor') !== '0' : DEFAULTS.preferMajor,
       mode: p.get('mode') || DEFAULTS.mode,
       safe: p.get('safe') === '1',

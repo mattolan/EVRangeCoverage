@@ -118,6 +118,8 @@
         <section class="sidebar-section collapsible" id="section-battery">
           <h2 class="section-header" data-section="section-battery">Battery <span class="section-summary" id="summary-battery"></span></h2>
           <div class="section-body">
+            <label for="battery-kwh-slider" class="slider-label-inline">Battery size <span id="battery-kwh-value">85 kWh</span></label>
+            <input type="range" id="battery-kwh-slider" min="30" max="200" value="85" step="5" />
             <label for="soc-slider" class="slider-label-inline">Start charge <span id="soc-value">80%</span></label>
             <input type="range" id="soc-slider" min="50" max="100" value="80" step="5" />
             <label for="reserve-slider" class="slider-label-inline">Reserve <span id="reserve-value">20%</span></label>
@@ -157,7 +159,7 @@
 
       <section class="sidebar-section">
         <h2>Route Planner</h2>
-        <div class="route-disclaimer">Drive times shown do not include charging stops.</div>
+        <div class="route-disclaimer">Charging times are estimates based on max charger power and do not account for taper or wait times.</div>
         <label for="charge-to-slider" class="slider-label-inline">Charge to at stops <span id="charge-to-value">80%</span></label>
         <input type="range" id="charge-to-slider" min="50" max="100" value="80" step="5" />
         <label class="checkbox-label">
