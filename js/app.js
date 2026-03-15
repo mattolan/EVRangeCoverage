@@ -745,8 +745,17 @@
     showRouteSpinner(false);
   }
 
+  var preRouteMode = null; // saved range mode before route planner
+
   function exitRouteMode() {
     routeMode = false;
+    // Restore previous range mode
+    if (preRouteMode !== null) {
+      rangeMode = preRouteMode;
+      document.querySelector('input[name="range-mode"][value="' + rangeMode + '"]').checked = true;
+      preRouteMode = null;
+      refresh();
+    }
     document.getElementById('route-toggle').textContent = 'Plan a Route';
     document.getElementById('route-instructions').classList.add('hidden');
     map.getContainer().style.cursor = '';
@@ -787,6 +796,13 @@
   function enterRouteMode() {
     routeMode = true;
     clearRoute();
+    // Switch to one-way so coverage map shows max range
+    if (rangeMode !== 'oneway') {
+      preRouteMode = rangeMode;
+      rangeMode = 'oneway';
+      document.querySelector('input[name="range-mode"][value="oneway"]').checked = true;
+      refresh();
+    }
     collapseSettingsPanels();
     document.getElementById('route-toggle').textContent = 'Cancel Route';
     document.getElementById('route-instructions').classList.remove('hidden');
